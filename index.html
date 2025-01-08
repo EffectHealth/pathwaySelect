@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PointerEvents Drag & Drop - Chips Return to Origin if Invalid</title>
-  <!-- Optional: Montserrat Black or any other font -->
+  <title>Drag & Drop in Single Container</title>
   <link 
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" 
     rel="stylesheet"
@@ -14,40 +13,55 @@
       margin: 0; 
       padding: 0;
       box-sizing: border-box;
-      user-select: none;         /* prevent text selection during pointer move */
-      -webkit-user-drag: none;   /* disable iOS Safari image dragging */
+      user-select: none;
+      -webkit-user-drag: none;
       -webkit-touch-callout: none;
     }
-    body {
-      margin: 20px;
-      color: #333;
-    }
-    h1, p {
-      text-align: center;
-      margin-bottom: 15px;
-    }
     html, body {
-  margin: 0;
-  padding: 0;
-}
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+    }
+    body {
+      /* We'll center the container and give some top margin */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-top: 20px;
+    }
 
+    /* The main container that holds everything */
+    #drag-container {
+      position: relative; /* Important so children can use absolute coords */
+      width: 600px;       /* Or whatever width you prefer */
+      min-height: 600px;  /* Enough height to hold the placeholders & final display */
+      border: 2px solid #ccc;
+      background: #fff;
+      margin-bottom: 40px; /* Some space at bottom */
+      overflow: hidden;    /* Hide anything that drags outside */
+    }
+
+    /* Basic layout inside the container */
     .row-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
+      margin-top: 20px;
     }
     .row {
       display: flex;
       justify-content: center;
-      gap: 40px; /* Space between placeholder wrappers */
+      gap: 40px;
     }
     .placeholder-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 80px; /* Ensures all wrappers have the same width */
+      width: 80px;
     }
+
     .placeholder {
       width: 60px;
       height: 60px;
@@ -58,12 +72,13 @@
       justify-content: center;
       position: relative;
     }
+
     .placeholder-label {
       font-weight: 900;
       font-size: 13px;
       color: #333;
       text-align: center;
-      margin-top: 10px; /* Space between circle and label */
+      margin-top: 10px;
       line-height: 1.2;
     }
     .placeholder-label span.weeks {
@@ -78,8 +93,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative; /* Will switch to absolute on drag */
-      touch-action: none; /* important for mobile to allow pointermove events */
+      position: absolute; /* We'll always keep them absolute inside #drag-container */
+      touch-action: none;
       cursor: grab;
     }
     .chip:active {
@@ -98,34 +113,34 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px; /* Space between the two boxes */
-      margin-top: 30px; /* Space from position rows */
+      gap: 20px;
+      margin-top: 20px;
     }
     #pathway-img-box {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 300px; /* Same size as max-width of the image */
-      height: 170px; /* Adjusted for typical image aspect ratio */
-      background: rgba(128, 128, 128, 0.5); /* 50% transparent gray */
-      border-radius: 8px; /* Rounded corners */
-      overflow: hidden; /* Prevent overflow of content */
+      width: 300px;
+      height: 170px;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
     }
     #pathway-button-box {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 300px; /* Match the width of the button */
-      height: 50px; /* Match the expected height of the button */
-      background: rgba(128, 128, 128, 0.5); /* 50% transparent gray */
-      border-radius: 8px; /* Rounded corners */
-      overflow: hidden; /* Prevent overflow of content */
+      width: 300px;
+      height: 50px;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
     }
     #pathway-img {
       display: block;
       width: 100%;
       height: auto;
-      visibility: hidden; /* Initially hidden until loaded */
+      visibility: hidden;
     }
     #pathway-button {
       display: block;
@@ -133,27 +148,28 @@
       font-weight: 900;
       color: white;
       background: #999966;
-      padding: 10px 20px; /* Padding to style the button */
+      padding: 10px 20px;
       border-radius: 6px;
-      visibility: hidden; /* Initially hidden until loaded */
+      visibility: hidden;
       transition: background 0.2s;
     }
     #pathway-button:hover {
       background: #285e8e;
     }
 
-    /* General responsive design for small devices */
+    /* Responsive for smaller screens */
     @media (max-width: 768px) {
-      body {
-        margin: 10px;
+      #drag-container {
+        width: 90%;
+        min-height: 500px; 
       }
       .row {
-        flex-direction: column; /* Stack rows vertically */
-        gap: 20px; /* Adjust spacing between items */
+        flex-direction: column;
+        gap: 20px;
       }
       .placeholder-wrapper {
-        width: 100%; /* Allow placeholders to stretch */
-        align-items: center; /* Center align */
+        width: 100%;
+        align-items: center;
       }
       .placeholder {
         width: 50px;
@@ -163,72 +179,72 @@
         width: 48px;
         height: 48px;
       }
-      #pathway-display {
-        gap: 10px; /* Adjust spacing between boxes */
-        margin-top: 20px; /* Reduce spacing from rows */
-      }
       #pathway-img-box, #pathway-button-box {
-        width: 90%; /* Reduce width to fit mobile screens */
-        height: auto; /* Allow height to adjust automatically */
+        width: 90%;
+        height: auto;
       }
       #pathway-button {
-        font-size: 14px; /* Adjust font size for smaller screens */
-        padding: 8px 16px; /* Adjust button padding */
+        font-size: 14px;
+        padding: 8px 16px;
       }
     }
   </style>
 </head>
 <body>
 
-<div class="row-wrapper">
-  <!-- ROW of ORIGINS (1,2,3,4) -->
-  <div class="row">
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="origin1"></div>
-      <div class="placeholder-label">Physical<br>Activity</div>
+<div id="drag-container">
+  <!-- All placeholders + final display are inside #drag-container -->
+
+  <div class="row-wrapper">
+    <!-- ROW of ORIGINS (1,2,3,4) -->
+    <div class="row">
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin1"></div>
+        <div class="placeholder-label">Physical<br>Activity</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin2"></div>
+        <div class="placeholder-label">Comprehensive<br>Nutrition</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin3"></div>
+        <div class="placeholder-label">Restful<br>Sleep</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin4"></div>
+        <div class="placeholder-label">Stress<br>Management</div>
+      </div>
     </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="origin2"></div>
-      <div class="placeholder-label">Comprehensive<br>Nutrition</div>
-    </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="origin3"></div>
-      <div class="placeholder-label">Restful<br>Sleep</div>
-    </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="origin4"></div>
-      <div class="placeholder-label">Stress<br>Management</div>
+
+    <!-- ROW of POSITIONS (a,b,c,d) -->
+    <div class="row">
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="a"></div>
+        <div class="placeholder-label">Semester 1<br><span class="weeks">(Weeks 1–13)</span></div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="b"></div>
+        <div class="placeholder-label">Semester 2<br><span class="weeks">(Weeks 14–26)</span></div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="c"></div>
+        <div class="placeholder-label">Semester 3<br><span class="weeks">(Weeks 27–29)</span></div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="d"></div>
+        <div class="placeholder-label">Semester 4<br><span class="weeks">(Weeks 40–52)</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- ROW of POSITIONS (a,b,c,d) -->
-  <div class="row">
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="a"></div>
-      <div class="placeholder-label">Semester 1<br><span class="weeks">(Weeks 1–13)</span></div>
+  <!-- Pathway display area -->
+  <div id="pathway-display">
+    <div id="pathway-img-box">
+      <img id="pathway-img" src="" alt="Pathway Image">
     </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="b"></div>
-      <div class="placeholder-label">Semester 2<br><span class="weeks">(Weeks 14–26)</span></div>
+    <div id="pathway-button-box">
+      <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
     </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="c"></div>
-      <div class="placeholder-label">Semester 3<br><span class="weeks">(Weeks 27–29)</span></div>
-    </div>
-    <div class="placeholder-wrapper">
-      <div class="placeholder" data-slot="d"></div>
-      <div class="placeholder-label">Semester 4<br><span class="weeks">(Weeks 40–52)</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- Pathway display area (two boxes: one for image, one for button) -->
-<div id="pathway-display">
-  <div id="pathway-img-box">
-    <img id="pathway-img" src="" alt="Pathway Image">
-  </div>
-  <div id="pathway-button-box">
-    <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
   </div>
 </div>
 
@@ -236,16 +252,15 @@
 // -----------------------------------------
 // (1) Data and Setup
 // -----------------------------------------
+const dragContainer = document.getElementById("drag-container");
+
 const validSlots = {
-  // Each chip can go from origin# => a/b/c/d
   "1": ["origin1","a","b","c","d"],
   "2": ["origin2","a","b","c","d"],
   "3": ["origin3","a","b","c","d"],
   "4": ["origin4","a","b","c","d"]
 };
 
-// Which chip letter occupies each slot
-// (null if empty)
 const slotMap = {
   origin1: "1",
   origin2: "2",
@@ -257,7 +272,6 @@ const slotMap = {
   d: null
 };
 
-// Helper: get the origin slot for a chip letter
 function originSlot(letter) {
   return "origin" + letter;
 }
@@ -394,30 +408,52 @@ const pathways = {
 };
 
 // -----------------------------------------
-// (2) Create Chips in origin slots
+// (3) Create Chips in origin slots
 // -----------------------------------------
 ["1","2","3","4"].forEach(num => {
   const slotId = "origin" + num;  
   const slotEl = document.querySelector(`[data-slot='${slotId}']`);
   const chipEl = createChip(num);
+  // We'll place the chip initially *over* the placeholder.
+  // We'll compute the placeholder's position inside #drag-container
+  // and absolutely position the chip there.
   slotEl.appendChild(chipEl);
+  positionChipOverPlaceholder(chipEl, slotEl);
 });
 
 function createChip(num) {
-  const div = document.createElement('div');
-  div.classList.add('chip');
+  const div = document.createElement("div");
+  div.classList.add("chip");
   div.dataset.letter = num;
-  addPointerEvents(div);
 
-  const img = document.createElement('img');
+  // Add the image
+  const img = document.createElement("img");
   img.src = images[num];
   div.appendChild(img);
+
+  // Add pointer events
+  div.addEventListener("pointerdown", onPointerDown);
 
   return div;
 }
 
+// This function absolutely positions the chip over a placeholder
+function positionChipOverPlaceholder(chipEl, placeholderEl) {
+  // measure container + placeholder
+  const containerRect = dragContainer.getBoundingClientRect();
+  const placeholderRect = placeholderEl.getBoundingClientRect();
+
+  // The placeholder's coords relative to #drag-container
+  const offsetLeft = placeholderRect.left - containerRect.left;
+  const offsetTop  = placeholderRect.top  - containerRect.top;
+
+  // Move the chip on top of that placeholder
+  chipEl.style.left = offsetLeft + "px";
+  chipEl.style.top  = offsetTop + "px";
+}
+
 // -----------------------------------------
-// (3) Pointer-based Drag Logic
+// (4) Pointer-based Drag Logic
 // -----------------------------------------
 let draggedChip = null;
 let oldSlot = null;
@@ -425,55 +461,49 @@ let offsetX = 0;
 let offsetY = 0;
 let isDragging = false;
 
-function addPointerEvents(chip) {
-  chip.addEventListener("pointerdown", onPointerDown);
-}
-
 function onPointerDown(e) {
   e.preventDefault();
+  if (!e.currentTarget.classList.contains("chip")) return;
+
   draggedChip = e.currentTarget;
-  oldSlot = draggedChip.parentElement.dataset.slot;
-
-  // 1) bounding rect relative to *viewport*:
-  const rect = draggedChip.getBoundingClientRect();
-
-  // 2) offset from pointer to chip's top-left:
-  //    (clientX - rect.left, clientY - rect.top)
-  offsetX = e.clientX - rect.left;
-  offsetY = e.clientY - rect.top;
-
-  // 3) Switch to absolute so we can move it
-  draggedChip.style.position = "absolute";
-  draggedChip.style.zIndex = 9999;
-
-  // 4) Place it at the same screen location,
-  //    but also account for any scroll offset
-  draggedChip.style.left = (rect.left + window.scrollX) + "px";
-  draggedChip.style.top  = (rect.top  + window.scrollY) + "px";
-
-  // 5) Capture pointer & track moves
+  oldSlot = draggedChip.parentElement.dataset.slot; // might be "origin1" or "a", etc.
   draggedChip.setPointerCapture(e.pointerId);
+
+  // measure container + chip
+  const containerRect = dragContainer.getBoundingClientRect();
+  const chipRect = draggedChip.getBoundingClientRect();
+
+  // offset between pointer and top-left of chip
+  offsetX = e.clientX - chipRect.left;
+  offsetY = e.clientY - chipRect.top;
+
+  // We'll track pointermove/pointerup on the chip
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
   isDragging = true;
 }
 
-
-
 function onPointerMove(e) {
-  if (!isDragging || !draggedChip) return;
+  if (!draggedChip || !isDragging) return;
   e.preventDefault();
 
-  // newLeft/newTop = pointer's client coords minus offset,
-  // but also add the scroll offset
-  const newLeft = e.clientX - offsetX + window.scrollX;
-  const newTop  = e.clientY - offsetY + window.scrollY;
+  const containerRect = dragContainer.getBoundingClientRect();
 
-  draggedChip.style.left = newLeft + "px";
-  draggedChip.style.top  = newTop + "px";
+  // pointer coords relative to container
+  const pointerX = e.clientX - containerRect.left;
+  const pointerY = e.clientY - containerRect.top;
+
+  // subtract offset so the chip doesn't jump
+  const newLeft = pointerX - offsetX;
+  const newTop  = pointerY - offsetY;
+
+  // keep chip in container bounds if you want
+  const maxLeft = containerRect.width - draggedChip.offsetWidth;
+  const maxTop  = containerRect.height - draggedChip.offsetHeight;
+
+  draggedChip.style.left = Math.max(0, Math.min(maxLeft, newLeft)) + "px";
+  draggedChip.style.top  = Math.max(0, Math.min(maxTop,  newTop))  + "px";
 }
-
-
 
 function onPointerUp(e) {
   e.preventDefault();
@@ -484,40 +514,36 @@ function onPointerUp(e) {
   draggedChip.removeEventListener("pointerup", onPointerUp);
   isDragging = false;
 
-  // detect final drop target
-  let target = document.elementFromPoint(e.clientX, e.clientY);
+  // figure out final drop
+  const x = e.clientX;
+  const y = e.clientY;
+  let target = document.elementFromPoint(x, y);
 
-  // if we ended over another chip, go up to its parent placeholder
+  // if over another chip, go up to its parent placeholder
   if (target && target.classList.contains("chip")) {
     target = target.parentElement;
   }
 
-  // if it's a .placeholder, see if it's a valid "position" (a,b,c,d)
+  // If it's a valid placeholder:
   if (target && target.classList.contains("placeholder")) {
     const targetSlot = target.dataset.slot;
-    const chipLetter = draggedChip.dataset.letter;
+    const letter = draggedChip.dataset.letter;
 
     // only accept dropping onto a,b,c,d if valid
-    if (
-      ["a","b","c","d"].includes(targetSlot) &&
-      validSlots[chipLetter].includes(targetSlot) &&
-      slotMap[targetSlot] !== chipLetter
-    ) {
-      // occupant logic: occupant (if any) goes home
+    if (["a","b","c","d"].includes(targetSlot) &&
+        validSlots[letter].includes(targetSlot) &&
+        slotMap[targetSlot] !== letter) {
+      // occupant logic
       const occupant = slotMap[targetSlot];
       if (occupant) {
-        // remove occupant from DOM
+        // occupant goes home
         const occupantChip = document.querySelector(`[data-slot='${targetSlot}'] .chip`);
-        if (occupantChip) occupantChip.remove();
-        // occupant goes back to occupant's origin
-        const occupantHome = originSlot(occupant);
+        if (occupantChip) occupantChip.remove(); // remove from DOM
         slotMap[targetSlot] = null;
-        forceMoveChipToSlot(occupantChip, targetSlot, occupantHome);
+        forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
       }
-
       // place dragged chip in that slot
       forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
-      resetChipStyles(draggedChip);
       updatePathwayDisplay();
       draggedChip = null;
       oldSlot = null;
@@ -525,59 +551,48 @@ function onPointerUp(e) {
     }
   }
 
-  // otherwise, revert to origin if dropped anywhere else
+  // otherwise revert to origin
   revertChip();
 }
 
 function revertChip() {
-  if (draggedChip) {
-    // send chip back to its "originX"
-    const letter = draggedChip.dataset.letter;
-    const home = originSlot(letter);
-    forceMoveChipToSlot(draggedChip, oldSlot, home);
-    resetChipStyles(draggedChip);
-  }
+  if (!draggedChip) return;
+  const letter = draggedChip.dataset.letter;
+  const home = originSlot(letter);
+  forceMoveChipToSlot(draggedChip, oldSlot, home);
   draggedChip = null;
   oldSlot = null;
   isDragging = false;
   updatePathwayDisplay();
 }
 
-function resetChipStyles(chip) {
-  chip.style.position = "static";
-  chip.style.left = "";
-  chip.style.top = "";
-  chip.style.zIndex = "";
-}
-
-// -----------------------------------------
-// (4) Placing a chip in a slot (DOM & map)
-// -----------------------------------------
+// Move the chipEl into toSlot (which might be a, b, c, d, or origin#)
 function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
   if (!chipEl) return;
-
-  // remove occupant if any (but we do occupant logic in pointerUp now)
   const occupant = slotMap[toSlot];
   if (occupant && occupant !== chipEl.dataset.letter) {
-    // occupant goes to occupant's origin
+    // occupant goes home
     const occupantChip = document.querySelector(`[data-slot='${toSlot}'] .chip`);
     if (occupantChip) occupantChip.remove();
     slotMap[toSlot] = null;
     forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
   }
+  // Put the chipEl physically over that placeholder in the container
+  const placeholderEl = document.querySelector(`[data-slot='${toSlot}']`);
+  if (!placeholderEl) return;
 
-  // place our chip in toSlot
-  const targetEl = document.querySelector(`[data-slot='${toSlot}']`);
-  if (!targetEl) return;
-
-  // clear target placeholder
-  while (targetEl.firstChild) {
-    targetEl.removeChild(targetEl.firstChild);
+  // Remove any child from the placeholder
+  while (placeholderEl.firstChild) {
+    placeholderEl.removeChild(placeholderEl.firstChild);
   }
-  targetEl.appendChild(chipEl);
+  // Put the chipEl inside that placeholder
+  placeholderEl.appendChild(chipEl);
   slotMap[toSlot] = chipEl.dataset.letter;
 
-  // clear fromSlot if it was the same chip
+  // Absolutely position the chip over the placeholder
+  positionChipOverPlaceholder(chipEl, placeholderEl);
+
+  // Clear old slot if it was the same chip
   if (slotMap[fromSlot] === chipEl.dataset.letter) {
     slotMap[fromSlot] = null;
   }
@@ -588,7 +603,7 @@ function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
 // -----------------------------------------
 function updatePathwayDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
-  const allFilled = (slotMap.a && slotMap.b && slotMap.c && slotMap.d);
+  const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
 
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
@@ -598,12 +613,10 @@ function updatePathwayDisplay() {
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
 
-  // If not all positions are filled, do nothing
-  if (!allFilled) return;
+  if (!allFilled) return; // not all 4 positions filled
 
-  // If we have a valid code
   const p = pathways[code];
-  if (!p) return;
+  if (!p) return; // code not found
 
   // Show the matched image/button
   imgEl.src = p.image;
@@ -613,7 +626,7 @@ function updatePathwayDisplay() {
   btnEl.style.visibility = "visible";
 }
 
-// Initialize once (in case some slots pre-filled)
+// (6) Initialize any final UI
 updatePathwayDisplay();
 </script>
 </body>
