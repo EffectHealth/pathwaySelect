@@ -234,6 +234,30 @@ body {
   color: #333;
 }
 
+    /* Placeholder text inside the pathway image box */
+#display-box-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #555;           /* dark grey */
+  font-size: 3vw;        /* larger font */
+  text-align: center;
+  pointer-events: none;  /* so clicks pass through */
+}
+
+/* Placeholder text inside the link box */
+#display-link-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #555;           /* dark grey */
+  font-size: 1.5vw;      /* smaller font than image placeholder */
+  text-align: center;
+  pointer-events: none;
+}
+
     /* 
       NOTE: 
       If you want the final display area to match the 
@@ -320,11 +344,14 @@ body {
   <!-- Example final display area -->
   <div id="display-area">
   <div id="display-box">
-    <img id="pathway-img" src="" alt="Pathway Image">
-  </div>
-  <div id="display-link-box">
-    <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
-  </div>
+  <div id="display-box-placeholder">Choose your path to a healthier life</div>
+  <img id="pathway-img" src="" alt="Pathway Image">
+</div>
+<div id="display-link-box">
+  <div id="display-link-placeholder">Get your custom path link</div>
+  <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
+</div>
+
   <!-- New caption element -->
   <p id="display-caption"></p>
 </div>
@@ -705,12 +732,20 @@ function updateDisplay() {
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
   const captionEl = document.getElementById("display-caption");
+  
+  // Access the new placeholder elements
+  const boxPlaceholder = document.getElementById("display-box-placeholder");
+  const linkPlaceholder = document.getElementById("display-link-placeholder");
 
   // Reset display and caption
   imgEl.src = "";
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
   captionEl.textContent = "";
+
+  // Show placeholders by default
+  boxPlaceholder.style.display = "block";
+  linkPlaceholder.style.display = "block";
 
   if (!allFilled) return;
 
@@ -724,11 +759,16 @@ function updateDisplay() {
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
 
+  // Hide placeholders when content is available
+  boxPlaceholder.style.display = "none";
+  linkPlaceholder.style.display = "none";
+
   // Set caption if available
   if (p.caption) {
     captionEl.textContent = p.caption;
   }
 }
+
 </script>
 </body>
 </html>
