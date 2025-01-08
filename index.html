@@ -535,15 +535,17 @@ const pathways = {
 };
 
 
+const placeholdersArea = document.getElementById("placeholders-area");
 const dragContainer = document.getElementById("drag-container");
-// We'll recalc this rect on pointerdown
-let dragContainerRect = dragContainer.getBoundingClientRect(); 
 const chipsLayer = document.getElementById("chips-layer");
+
+// Update this rect on pointer down
+let placeholdersRect = placeholdersArea.getBoundingClientRect();
 
 // ---------------------------
 // (2) Create the initial chips
 // ---------------------------
-["1","2","3","4"].forEach(letter => {
+["1", "2", "3", "4"].forEach((letter) => {
   createChip(letter, `origin${letter}`);
 });
 
@@ -552,14 +554,10 @@ function createChip(letter, slotId) {
   chip.classList.add("chip");
   chip.dataset.letter = letter;
 
-  // Insert the image
   if (images[letter]) {
     const img = document.createElement("img");
     img.src = images[letter];
     chip.appendChild(img);
-  } else {
-    // fallback text
-    chip.textContent = letter;
   }
 
   chipsLayer.appendChild(chip);
@@ -568,24 +566,18 @@ function createChip(letter, slotId) {
   chip.addEventListener("pointerdown", onPointerDown);
 }
 
-// Position the chip over the placeholder center
+// Position the chip over a slot
 function positionChipOverSlot(chipEl, slotId) {
   const slotEl = document.querySelector(`[data-slot='${slotId}']`);
   if (!slotEl) return;
 
   const slotRect = slotEl.getBoundingClientRect();
-  
-  // use placeholdersRect
   const offsetLeft = slotRect.left - placeholdersRect.left;
-  const offsetTop  = slotRect.top  - placeholdersRect.top;
+  const offsetTop = slotRect.top - placeholdersRect.top;
 
-  const centerX = offsetLeft + (slotRect.width/2) - (chipEl.offsetWidth/2);
-  const centerY = offsetTop  + (slotRect.height/2) - (chipEl.offsetHeight/2);
-
-  chipEl.style.left = centerX + "px";
-  chipEl.style.top  = centerY + "px";
+  chipEl.style.left = `${offsetLeft + slotRect.width / 2 - chipEl.offsetWidth / 2}px`;
+  chipEl.style.top = `${offsetTop + slotRect.height / 2 - chipEl.offsetHeight / 2}px`;
 }
-
 
 // ---------------------------
 // (3) Pointer-based Drag
@@ -599,47 +591,40 @@ let isDragging = false;
 function onPointerDown(e) {
   e.preventDefault();
 
-  // recalc the placeholders area
+  // Update placeholdersRect for accurate positioning
   placeholdersRect = placeholdersArea.getBoundingClientRect();
 
   draggedChip = e.currentTarget;
   oldSlot = findSlotOfLetter(draggedChip.dataset.letter);
 
-  // rest is the same...
   draggedChip.style.zIndex = 9999;
   draggedChip.setPointerCapture(e.pointerId);
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
 
-  isDragging = true;
-
-  // measure offset from pointer to chip's top-left
   const rect = draggedChip.getBoundingClientRect();
   offsetX = e.clientX - rect.left;
   offsetY = e.clientY - rect.top;
-}
 
+  isDragging = true;
+}
 
 function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  const relX = e.clientX - placeholdersRect.left; 
-  const relY = e.clientY - placeholdersRect.top;
+  const relX = e.clientX - placeholdersRect.left - offsetX;
+  const relY = e.clientY - placeholdersRect.top - offsetY;
 
-  let x = relX - offsetX;
-  let y = relY - offsetY;
-
-  // clamp to placeholdersRect width/height, if you want
   const maxX = placeholdersRect.width - draggedChip.offsetWidth;
   const maxY = placeholdersRect.height - draggedChip.offsetHeight;
-  x = Math.max(0, Math.min(x, maxX));
-  y = Math.max(0, Math.min(y, maxY));
 
-  draggedChip.style.left = x + "px";
-  draggedChip.style.top  = y + "px";
+  const x = Math.max(0, Math.min(relX, maxX));
+  const y = Math.max(0, Math.min(relY, maxY));
+
+  draggedChip.style.left = `${x}px`;
+  draggedChip.style.top = `${y}px`;
 }
-
 
 function onPointerUp(e) {
   e.preventDefault();
@@ -651,39 +636,28 @@ function onPointerUp(e) {
   draggedChip.removeEventListener("pointerup", onPointerUp);
   isDragging = false;
 
-  const letter = draggedChip.dataset.letter;
   const targetPlaceholder = findPlaceholderUnderChip(draggedChip);
 
   if (targetPlaceholder) {
     const targetSlot = targetPlaceholder.dataset.slot;
-    // Check if valid slot
     if (
-      ["a","b","c","d"].includes(targetSlot) &&
-      validSlots[letter].includes(targetSlot) &&
-      slotMap[targetSlot] !== letter
+      ["a", "b", "c", "d"].includes(targetSlot) &&
+      validSlots[draggedChip.dataset.letter].includes(targetSlot)
     ) {
-      // occupant logic
       const occupant = slotMap[targetSlot];
       if (occupant) {
         const occupantChip = findChipByLetter(occupant);
         if (occupantChip) {
           forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
         }
-        slotMap[targetSlot] = null;
       }
       forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
       updateDisplay();
-      draggedChip = null;
-      oldSlot = null;
       return;
     }
   }
 
-  // otherwise revert
   revertChip(draggedChip, oldSlot);
-  draggedChip = null;
-  oldSlot = null;
-  updateDisplay();
 }
 
 function findPlaceholderUnderChip(chipEl) {
@@ -691,24 +665,19 @@ function findPlaceholderUnderChip(chipEl) {
   const chipCenterX = chipRect.left + chipRect.width / 2;
   const chipCenterY = chipRect.top + chipRect.height / 2;
 
-  const placeholders = document.querySelectorAll(".placeholder");
-  for (const ph of placeholders) {
-    const phRect = ph.getBoundingClientRect();
-    if (
-      chipCenterX >= phRect.left &&
-      chipCenterX <= phRect.right &&
-      chipCenterY >= phRect.top &&
-      chipCenterY <= phRect.bottom
-    ) {
-      return ph;
-    }
-  }
-  return null;
+  return Array.from(document.querySelectorAll(".placeholder")).find((ph) => {
+    const rect = ph.getBoundingClientRect();
+    return (
+      chipCenterX >= rect.left &&
+      chipCenterX <= rect.right &&
+      chipCenterY >= rect.top &&
+      chipCenterY <= rect.bottom
+    );
+  });
 }
 
 function revertChip(chipEl, fromSlot) {
-  const letter = chipEl.dataset.letter;
-  forceMoveChipToSlot(chipEl, fromSlot, originSlot(letter));
+  forceMoveChipToSlot(chipEl, fromSlot, originSlot(chipEl.dataset.letter));
 }
 
 function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
@@ -718,8 +687,8 @@ function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
     if (occupantChip) {
       forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
     }
-    slotMap[toSlot] = null;
   }
+
   slotMap[toSlot] = chipEl.dataset.letter;
   if (slotMap[fromSlot] === chipEl.dataset.letter) {
     slotMap[fromSlot] = null;
@@ -727,21 +696,8 @@ function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
   positionChipOverSlot(chipEl, toSlot);
 }
 
-function findSlotOfLetter(letter) {
-  for (const slot in slotMap) {
-    if (slotMap[slot] === letter) {
-      return slot;
-    }
-  }
-  return null;
-}
-function findChipByLetter(letter) {
-  return [...document.querySelectorAll(".chip")]
-    .find(chip => chip.dataset.letter === letter);
-}
-
 // ---------------------------
-// (4) Show final or partial result
+// (4) Update Display
 // ---------------------------
 function updateDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
@@ -752,33 +708,224 @@ function updateDisplay() {
   const captionBox = document.getElementById("display-caption-box");
   const captionEl = document.getElementById("pathway-caption");
 
-  // reset everything
   imgEl.src = "";
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
-  captionBox.style.display = "none"; // hide by default
-  captionEl.textContent = "";
+  captionBox.style.display = "none";
 
   if (!allFilled) return;
 
   const p = pathways[code];
   if (!p) return;
 
-  // Show the image
   imgEl.src = p.image;
   imgEl.style.visibility = "visible";
 
-  // Show the button
   btnEl.textContent = p.title;
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
 
-  // If there's a caption, show it
   if (p.caption) {
     captionEl.textContent = p.caption;
-    captionBox.style.display = "block"; // now the caption is visible
+    captionBox.style.display = "block";
   }
 }
+const placeholdersArea = document.getElementById("placeholders-area");
+const dragContainer = document.getElementById("drag-container");
+const chipsLayer = document.getElementById("chips-layer");
+
+// Update this rect on pointer down
+let placeholdersRect = placeholdersArea.getBoundingClientRect();
+
+// ---------------------------
+// (2) Create the initial chips
+// ---------------------------
+["1", "2", "3", "4"].forEach((letter) => {
+  createChip(letter, `origin${letter}`);
+});
+
+function createChip(letter, slotId) {
+  const chip = document.createElement("div");
+  chip.classList.add("chip");
+  chip.dataset.letter = letter;
+
+  if (images[letter]) {
+    const img = document.createElement("img");
+    img.src = images[letter];
+    chip.appendChild(img);
+  }
+
+  chipsLayer.appendChild(chip);
+  positionChipOverSlot(chip, slotId);
+
+  chip.addEventListener("pointerdown", onPointerDown);
+}
+
+// Position the chip over a slot
+function positionChipOverSlot(chipEl, slotId) {
+  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
+  if (!slotEl) return;
+
+  const slotRect = slotEl.getBoundingClientRect();
+  const offsetLeft = slotRect.left - placeholdersRect.left;
+  const offsetTop = slotRect.top - placeholdersRect.top;
+
+  chipEl.style.left = `${offsetLeft + slotRect.width / 2 - chipEl.offsetWidth / 2}px`;
+  chipEl.style.top = `${offsetTop + slotRect.height / 2 - chipEl.offsetHeight / 2}px`;
+}
+
+// ---------------------------
+// (3) Pointer-based Drag
+// ---------------------------
+let draggedChip = null;
+let oldSlot = null;
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false;
+
+function onPointerDown(e) {
+  e.preventDefault();
+
+  // Update placeholdersRect for accurate positioning
+  placeholdersRect = placeholdersArea.getBoundingClientRect();
+
+  draggedChip = e.currentTarget;
+  oldSlot = findSlotOfLetter(draggedChip.dataset.letter);
+
+  draggedChip.style.zIndex = 9999;
+  draggedChip.setPointerCapture(e.pointerId);
+  draggedChip.addEventListener("pointermove", onPointerMove);
+  draggedChip.addEventListener("pointerup", onPointerUp);
+
+  const rect = draggedChip.getBoundingClientRect();
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
+
+  isDragging = true;
+}
+
+function onPointerMove(e) {
+  if (!isDragging || !draggedChip) return;
+  e.preventDefault();
+
+  const relX = e.clientX - placeholdersRect.left - offsetX;
+  const relY = e.clientY - placeholdersRect.top - offsetY;
+
+  const maxX = placeholdersRect.width - draggedChip.offsetWidth;
+  const maxY = placeholdersRect.height - draggedChip.offsetHeight;
+
+  const x = Math.max(0, Math.min(relX, maxX));
+  const y = Math.max(0, Math.min(relY, maxY));
+
+  draggedChip.style.left = `${x}px`;
+  draggedChip.style.top = `${y}px`;
+}
+
+function onPointerUp(e) {
+  e.preventDefault();
+  if (!draggedChip) return;
+
+  draggedChip.style.zIndex = 10;
+  draggedChip.releasePointerCapture(e.pointerId);
+  draggedChip.removeEventListener("pointermove", onPointerMove);
+  draggedChip.removeEventListener("pointerup", onPointerUp);
+  isDragging = false;
+
+  const targetPlaceholder = findPlaceholderUnderChip(draggedChip);
+
+  if (targetPlaceholder) {
+    const targetSlot = targetPlaceholder.dataset.slot;
+    if (
+      ["a", "b", "c", "d"].includes(targetSlot) &&
+      validSlots[draggedChip.dataset.letter].includes(targetSlot)
+    ) {
+      const occupant = slotMap[targetSlot];
+      if (occupant) {
+        const occupantChip = findChipByLetter(occupant);
+        if (occupantChip) {
+          forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
+        }
+      }
+      forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
+      updateDisplay();
+      return;
+    }
+  }
+
+  revertChip(draggedChip, oldSlot);
+}
+
+function findPlaceholderUnderChip(chipEl) {
+  const chipRect = chipEl.getBoundingClientRect();
+  const chipCenterX = chipRect.left + chipRect.width / 2;
+  const chipCenterY = chipRect.top + chipRect.height / 2;
+
+  return Array.from(document.querySelectorAll(".placeholder")).find((ph) => {
+    const rect = ph.getBoundingClientRect();
+    return (
+      chipCenterX >= rect.left &&
+      chipCenterX <= rect.right &&
+      chipCenterY >= rect.top &&
+      chipCenterY <= rect.bottom
+    );
+  });
+}
+
+function revertChip(chipEl, fromSlot) {
+  forceMoveChipToSlot(chipEl, fromSlot, originSlot(chipEl.dataset.letter));
+}
+
+function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
+  const occupant = slotMap[toSlot];
+  if (occupant && occupant !== chipEl.dataset.letter) {
+    const occupantChip = findChipByLetter(occupant);
+    if (occupantChip) {
+      forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
+    }
+  }
+
+  slotMap[toSlot] = chipEl.dataset.letter;
+  if (slotMap[fromSlot] === chipEl.dataset.letter) {
+    slotMap[fromSlot] = null;
+  }
+  positionChipOverSlot(chipEl, toSlot);
+}
+
+// ---------------------------
+// (4) Update Display
+// ---------------------------
+function updateDisplay() {
+  const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
+  const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
+
+  const imgEl = document.getElementById("pathway-img");
+  const btnEl = document.getElementById("pathway-button");
+  const captionBox = document.getElementById("display-caption-box");
+  const captionEl = document.getElementById("pathway-caption");
+
+  imgEl.src = "";
+  imgEl.style.visibility = "hidden";
+  btnEl.style.visibility = "hidden";
+  captionBox.style.display = "none";
+
+  if (!allFilled) return;
+
+  const p = pathways[code];
+  if (!p) return;
+
+  imgEl.src = p.image;
+  imgEl.style.visibility = "visible";
+
+  btnEl.textContent = p.title;
+  btnEl.href = p.url;
+  btnEl.style.visibility = "visible";
+
+  if (p.caption) {
+    captionEl.textContent = p.caption;
+    captionBox.style.display = "block";
+  }
+}
+
 </script>
 </body>
 </html>
