@@ -430,39 +430,45 @@ function onPointerDown(e) {
   draggedChip = e.currentTarget;
   oldSlot = draggedChip.parentElement.dataset.slot;
 
+  // 1) bounding rect relative to *viewport*:
   const rect = draggedChip.getBoundingClientRect();
 
-  // Use pageX - ( rect.left + scrollX ) for offset
-  offsetX = e.pageX - (rect.left + window.scrollX);
-  offsetY = e.pageY - (rect.top  + window.scrollY);
+  // 2) offset from pointer to chip's top-left:
+  //    (clientX - rect.left, clientY - rect.top)
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 
+  // 3) Switch to absolute so we can move it
   draggedChip.style.position = "absolute";
   draggedChip.style.zIndex = 9999;
 
-  // Place it at the same 'page' position
-  // (rect.left + scrollX) and (rect.top + scrollY) 
-  // so it doesn't jump
+  // 4) Place it at the same screen location,
+  //    but also account for any scroll offset
   draggedChip.style.left = (rect.left + window.scrollX) + "px";
   draggedChip.style.top  = (rect.top  + window.scrollY) + "px";
 
+  // 5) Capture pointer & track moves
   draggedChip.setPointerCapture(e.pointerId);
-
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
   isDragging = true;
 }
 
 
+
 function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  const newLeft = e.pageX - offsetX;
-  const newTop  = e.pageY - offsetY;
+  // newLeft/newTop = pointer's client coords minus offset,
+  // but also add the scroll offset
+  const newLeft = e.clientX - offsetX + window.scrollX;
+  const newTop  = e.clientY - offsetY + window.scrollY;
 
   draggedChip.style.left = newLeft + "px";
   draggedChip.style.top  = newTop + "px";
 }
+
 
 
 function onPointerUp(e) {
