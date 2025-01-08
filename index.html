@@ -454,8 +454,12 @@ function positionChipOverSlot(chipEl, slotId) {
   const cy = dragContainerRect.top;
 
   // center the chip in that slot
-  const centerX = slotRect.left + slotRect.width / 2 - cx - (chipEl.offsetWidth / 2);
-  const centerY = slotRect.top + slotRect.height / 2 - cy - (chipEl.offsetHeight / 2);
+ const centerX = slotRect.left + slotRect.width / 2 
+                - cx - (chipEl.offsetWidth / 2)
+                + 2; // shift right by 2px, or negative to shift left
+const centerY = slotRect.top + slotRect.height / 2 
+                - cy - (chipEl.offsetHeight / 2)
+                - 3; // shift up by 3px, or positive to shift down
 
   chipEl.style.left = centerX + "px";
   chipEl.style.top  = centerY + "px";
