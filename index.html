@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Final Drag & Drop: Ghost Chips + Transparent + Matching Width</title>
   <style>
-    * {
+    /* 1) Global reset + no text selection */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -14,6 +15,7 @@
   font-family: sans-serif;
 }
 
+/* 2) Basic body styling */
 body {
   display: flex;
   justify-content: center;
@@ -23,28 +25,26 @@ body {
   background: #fafafa;
 }
 
-/* 
-  #drag-container is our main container:
-  - Fill parent width (100%)
-  - Transparent background, no border
-  - Optional: max-width, min-height
-  - Overflow hidden to keep absolutely-positioned chips from showing scrollbars
+/* 3) The container: 
+      - Transparent
+      - No border
+      - 100% width (with optional max-width)
+      - Enough min-height so there's space for placeholders & final boxes
 */
 #drag-container {
   position: relative;
   width: 100%;
-  max-width: 800px;       /* optional upper bound on wide screens */
-  min-height: 60vh;       /* optional vertical space, adjust as you like */
-  background: transparent; 
-  border: none;           /* no border */
+  max-width: 800px;       /* optional upper bound */
+  min-height: 60vh;       /* optional vertical size */
+  background: transparent;
+  border: none;
   margin-bottom: 40px;
-  overflow: hidden;
+  overflow: hidden;       /* hide scrollbars for absolutely-pos chips */
 }
 
-/* 
-  Rows + placeholders
-  Each placeholder is 15vw wide
-  The row gap is 5vw, so 4 placeholders (4 * 15vw = 60vw) + 3 gaps (3 * 5vw = 15vw) = 75vw total
+/* 4) Placeholders in rows
+      4 placeholders each 15vw wide
+      3 gaps of 5vw => total 75vw 
 */
 .row-wrapper {
   display: flex;
@@ -56,40 +56,37 @@ body {
 .row {
   display: flex;
   justify-content: center;
-  gap: 5vw; /* 3 gaps * 5vw = 15vw total gap */
+  gap: 5vw;  /* 3 x 5vw = 15vw total gap */
 }
 .placeholder-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 15vw;
-  max-width: 80px; /* keep them from getting too large */
+  width: 15vw;     /* each placeholder */
+  max-width: 80px; /* cap so it's not huge on big screens */
 }
 .placeholder {
-  position: relative;    /* so we can absolutely-position ghost inside */
+  position: relative; /* so ghost can be absolutely positioned inside */
   width: 15vw;
   height: 15vw;
   max-width: 80px;
   max-height: 80px;
-  border: 2px dotted #999; 
+  border: 2px dotted #999;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* clip any child (like ghost) that extends */
+  overflow: hidden;
 }
 .placeholder-label {
   text-align: center;
   font-weight: 900;
   margin-top: 10px;
   font-size: 2vw; 
-  max-font-size: 16px; /* if you want to cap the label size */
+  max-font-size: 16px; /* if needed, though this isn't standard CSS */
 }
 
-/* 
-  Ghost image: sits behind at 25% opacity 
-  pointer-events:none -> user can't interact with it
-*/
+/* 5) Ghost images at 25% opacity in each origin */
 .ghost {
   position: absolute;
   top: 0; 
@@ -99,28 +96,20 @@ body {
   opacity: 0.25;
   pointer-events: none;
   border-radius: 50%;
-  object-fit: cover; /* in case the ratio doesn't match exactly */
+  object-fit: cover;
 }
 
-/* 
-  #chips-layer: absolute layer for draggable chips
-  pointer-events:none so placeholders below it are clickable,
-  but we override on actual .chip
-*/
+/* 6) Chips layer: absolute container for movable chips */
 #chips-layer {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none; /* placeholders can be clicked behind it */
 }
 
-/* 
-  Draggable chips:
-  - match placeholders (15vw, max 80px)
-  - pointer-events: auto so user can drag them
-*/
+/* 7) Draggable chips, match placeholders in size (15vw) + max 80px. */
 .chip {
   position: absolute;
   width: 15vw;
@@ -130,12 +119,12 @@ body {
   border-radius: 50%;
   background: #ccc;
   cursor: grab;
-  pointer-events: auto; 
+  pointer-events: auto; /* so user can click/drag them */
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none; /* prevent gestures that might interfere */
+  touch-action: none;
 }
 .chip:active {
   cursor: grabbing;
@@ -148,10 +137,9 @@ body {
   object-fit: cover;
 }
 
-/* 
-  Final display area 
-  => match the total width of the 4 placeholders + 3 gaps = 75vw
-  plus a max-width to keep it from being too big on desktop
+/* 8) Final display area => 75vw wide 
+      #display-box => 38:21 aspect ratio 
+      #display-link-box => 152:21 aspect ratio
 */
 #display-area {
   display: flex;
@@ -161,41 +149,82 @@ body {
   gap: 3vh;
   margin-top: 30px;
 }
-#display-box,
-#display-link-box {
-  width: 75vw;        /* 4 placeholders(4x15vw=60vw) + 3 gaps(3x5vw=15vw) = 75vw */
-  max-width: 600px;   /* choose a max to taste */
-  min-height: 15vw;   /* if you want them about the same height as placeholders initially */
-  max-height: 80px;   /* or bigger if you want the image/btn to be taller */
+
+/* 8a) The Pathway image box => 75vw wide, ratio 38:21 
+   - "Aspect ratio box" trick with padding-top
+   - parent is position:relative
+   - child (#pathway-img) is absolutely positioned 
+*/
+#display-box {
+  width: 75vw;
+  max-width: 600px;
+  position: relative;
+  margin: 0 auto;
   background: rgba(128, 128, 128, 0.5);
   border-radius: 8px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;  /* center it horizontally if there's extra space */
+
+  /*
+    21 / 38 => ~0.5526
+    multiply by 100% => 55.26%
+  */
+  padding-top: 55.26%;
+}
+/* absolutely fill the box, so the aspect ratio is controlled by the box */
+#pathway-img {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* or contain if you prefer letterboxing */
+  visibility: hidden; 
 }
 
-#pathway-img {
-  width: 100%;
-  height: auto;
-  visibility: hidden;
+/* 8b) The Link box => 75vw wide, ratio 152:21 
+   => 21/152 => ~0.138 => 13.8%
+*/
+#display-link-box {
+  width: 75vw;
+  max-width: 600px;
+  position: relative;
+  margin: 0 auto;
+  background: rgba(128, 128, 128, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+
+  /* 21/152 => ~0.138 => 13.82% */
+  padding-top: 13.82%;
 }
+/* The button absolutely fills that area, 
+   or you can place it inside with flex layout if you prefer 
+*/
 #pathway-button {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+
   text-decoration: none;
   font-weight: 900;
   color: #fff;
   background: #999966;
-  padding: 0.5em 1em;
   border-radius: 6px;
   visibility: hidden;
   transition: background 0.2s;
-  font-size: 2vw;  /* scale text somewhat */
+
+  /* flex container for the text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2vw; 
   text-align: center;
 }
 #pathway-button:hover {
   background: #285e8e;
 }
+
 
     /* 
       NOTE: 
