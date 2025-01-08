@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PointerEvents Drag & Drop (Desktop + Mobile) - Fixed Offsets & Origin Return</title>
+  <title>PointerEvents Drag & Drop - Chips Return to Origin if Invalid</title>
   <!-- Optional: Montserrat Black or any other font -->
   <link 
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" 
@@ -26,6 +26,7 @@
       text-align: center;
       margin-bottom: 15px;
     }
+
     .row-wrapper {
       display: flex;
       flex-direction: column;
@@ -65,6 +66,7 @@
       font-weight: normal;
       color: #666;
     }
+
     .chip {
       width: 56px;
       height: 56px;
@@ -135,6 +137,7 @@
     #pathway-button:hover {
       background: #285e8e;
     }
+
     /* General responsive design for small devices */
     @media (max-width: 768px) {
       body {
@@ -230,12 +233,15 @@
 // (1) Data and Setup
 // -----------------------------------------
 const validSlots = {
+  // Each chip can go from origin# => a/b/c/d
   "1": ["origin1","a","b","c","d"],
   "2": ["origin2","a","b","c","d"],
   "3": ["origin3","a","b","c","d"],
   "4": ["origin4","a","b","c","d"]
 };
 
+// Which chip letter occupies each slot
+// (null if empty)
 const slotMap = {
   origin1: "1",
   origin2: "2",
@@ -247,6 +253,11 @@ const slotMap = {
   d: null
 };
 
+// Helper: get the origin slot for a chip letter
+function originSlot(letter) {
+  return "origin" + letter;
+}
+
 const images = {
   "1": "https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png",
   "2": "https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png",
@@ -254,6 +265,7 @@ const images = {
   "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
 };
 
+// Pathways dictionary
 const pathways = {
   "1234": {
     title: "Preventative Health: Foundation Pathway",
@@ -391,8 +403,6 @@ function createChip(num) {
   const div = document.createElement('div');
   div.classList.add('chip');
   div.dataset.letter = num;
-  
-  // Attach pointer event handlers
   addPointerEvents(div);
 
   const img = document.createElement('img');
@@ -418,28 +428,26 @@ function addPointerEvents(chip) {
 function onPointerDown(e) {
   e.preventDefault();
   draggedChip = e.currentTarget;
-  oldSlot = draggedChip.parentElement.dataset.slot;
+  oldSlot = draggedChip.parentElement.dataset.slot; // e.g. "origin3" or "a"
 
-  // Grab bounding rect on the page
+  // bounding rect relative to viewport
   const rect = draggedChip.getBoundingClientRect();
 
-  // (A) Calculate offset from pointer to the chip's top-left
-  // Using pageX/pageY so it works even if the document is scrolled
-  offsetX = e.pageX - rect.left;
-  offsetY = e.pageY - rect.top;
+  // offset from pointer to chip's top-left
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 
-  // (B) Switch to absolute so we can move it
+  // Switch to absolute so we can move it
   draggedChip.style.position = "absolute";
   draggedChip.style.zIndex = 9999;
-  
-  // Place it exactly where it was (relative to page)
-  draggedChip.style.left = (rect.left + window.scrollX) + "px";
-  draggedChip.style.top  = (rect.top  + window.scrollY) + "px";
 
-  // Capture subsequent pointer events
+  // place it at the same screen location
+  draggedChip.style.left = rect.left + "px";
+  draggedChip.style.top  = rect.top  + "px";
+
+  // capture pointer
   draggedChip.setPointerCapture(e.pointerId);
 
-  // Listen for pointermove/pointerup on this chip
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
   isDragging = true;
@@ -449,9 +457,9 @@ function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  // Move the chip to follow pointer, minus the offset
-  const newLeft = e.pageX - offsetX;
-  const newTop  = e.pageY - offsetY;
+  // update position: put the chip under the pointer
+  const newLeft = e.clientX - offsetX;
+  const newTop  = e.clientY - offsetY;
   draggedChip.style.left = newLeft + "px";
   draggedChip.style.top  = newTop + "px";
 }
@@ -460,52 +468,62 @@ function onPointerUp(e) {
   e.preventDefault();
   if (!draggedChip) return;
 
-  // Stop capturing pointer events
   draggedChip.releasePointerCapture(e.pointerId);
-
-  // Cleanup
   draggedChip.removeEventListener("pointermove", onPointerMove);
   draggedChip.removeEventListener("pointerup", onPointerUp);
   isDragging = false;
 
-  // Figure out where we dropped
-  const x = e.clientX;
-  const y = e.clientY;
-  let target = document.elementFromPoint(x, y);
+  // detect final drop target
+  let target = document.elementFromPoint(e.clientX, e.clientY);
 
-  // If pointer is on top of another chip, go up to its placeholder
+  // if we ended over another chip, go up to its parent placeholder
   if (target && target.classList.contains("chip")) {
     target = target.parentElement;
   }
 
-  // If it's a valid placeholder, check the slot
+  // if it's a .placeholder, see if it's a valid "position" (a,b,c,d)
   if (target && target.classList.contains("placeholder")) {
     const targetSlot = target.dataset.slot;
-    const letter = draggedChip.dataset.letter;
+    const chipLetter = draggedChip.dataset.letter;
 
-    // We only allow dropping onto "positions" or the same origin
-    // But the user requested: "return to origin if anywhere else but positions"
-    // So let's check if it's one of a,b,c,d
-    if (["a","b","c","d"].includes(targetSlot) && 
-        slotMap[targetSlot] !== letter && 
-        validSlots[letter].includes(targetSlot)) {
-      // Valid drop => move to that slot
+    // only accept dropping onto a,b,c,d if valid
+    if (
+      ["a","b","c","d"].includes(targetSlot) &&
+      validSlots[chipLetter].includes(targetSlot) &&
+      slotMap[targetSlot] !== chipLetter
+    ) {
+      // occupant logic: occupant (if any) goes home
+      const occupant = slotMap[targetSlot];
+      if (occupant) {
+        // remove occupant from DOM
+        const occupantChip = document.querySelector(`[data-slot='${targetSlot}'] .chip`);
+        if (occupantChip) occupantChip.remove();
+        // occupant goes back to occupant's origin
+        const occupantHome = originSlot(occupant);
+        slotMap[targetSlot] = null;
+        forceMoveChipToSlot(occupantChip, targetSlot, occupantHome);
+      }
+
+      // place dragged chip in that slot
       forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
-      updatePathwayDisplay();
       resetChipStyles(draggedChip);
+      updatePathwayDisplay();
       draggedChip = null;
       oldSlot = null;
       return;
     }
   }
 
-  // Otherwise revert to origin (i.e., oldSlot)
+  // otherwise, revert to origin if dropped anywhere else
   revertChip();
 }
 
 function revertChip() {
-  if (draggedChip && oldSlot) {
-    forceMoveChipToSlot(draggedChip, oldSlot, oldSlot);
+  if (draggedChip) {
+    // send chip back to its "originX"
+    const letter = draggedChip.dataset.letter;
+    const home = originSlot(letter);
+    forceMoveChipToSlot(draggedChip, oldSlot, home);
     resetChipStyles(draggedChip);
   }
   draggedChip = null;
@@ -522,40 +540,33 @@ function resetChipStyles(chip) {
 }
 
 // -----------------------------------------
-// (4) Move Chips in DOM + Occupant Logic
+// (4) Placing a chip in a slot (DOM & map)
 // -----------------------------------------
 function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
   if (!chipEl) return;
 
+  // remove occupant if any (but we do occupant logic in pointerUp now)
   const occupant = slotMap[toSlot];
   if (occupant && occupant !== chipEl.dataset.letter) {
-    // There's already a chip in target => remove or swap
+    // occupant goes to occupant's origin
     const occupantChip = document.querySelector(`[data-slot='${toSlot}'] .chip`);
     if (occupantChip) occupantChip.remove();
-
-    // occupant goes home if fromSlot=origin & toSlot=position
-    if (fromSlot.startsWith("origin") && ["a","b","c","d"].includes(toSlot)) {
-      const occupantHome = "origin" + occupant;
-      slotMap[toSlot] = null;
-      forceMoveChipToSlot(occupantChip, toSlot, occupantHome);
-    } else {
-      // otherwise swap occupant back to "fromSlot"
-      forceMoveChipToSlot(occupantChip, toSlot, fromSlot);
-    }
+    slotMap[toSlot] = null;
+    forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
   }
-  // Place the new chip
+
+  // place our chip in toSlot
   const targetEl = document.querySelector(`[data-slot='${toSlot}']`);
   if (!targetEl) return;
 
-  // Clear the target placeholder
+  // clear target placeholder
   while (targetEl.firstChild) {
     targetEl.removeChild(targetEl.firstChild);
   }
-  // Append the chip
   targetEl.appendChild(chipEl);
   slotMap[toSlot] = chipEl.dataset.letter;
 
-  // Clear old slot if it was this chip
+  // clear fromSlot if it was the same chip
   if (slotMap[fromSlot] === chipEl.dataset.letter) {
     slotMap[fromSlot] = null;
   }
@@ -566,7 +577,7 @@ function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
 // -----------------------------------------
 function updatePathwayDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
-  const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
+  const allFilled = (slotMap.a && slotMap.b && slotMap.c && slotMap.d);
 
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
@@ -579,10 +590,11 @@ function updatePathwayDisplay() {
   // If not all positions are filled, do nothing
   if (!allFilled) return;
 
-  // If we have a valid pathway code, show it
+  // If we have a valid code
   const p = pathways[code];
   if (!p) return;
 
+  // Show the matched image/button
   imgEl.src = p.image;
   imgEl.style.visibility = "visible";
   btnEl.textContent = p.title;
@@ -590,7 +602,7 @@ function updatePathwayDisplay() {
   btnEl.style.visibility = "visible";
 }
 
-// Initialize once
+// Initialize once (in case some slots pre-filled)
 updatePathwayDisplay();
 </script>
 </body>
