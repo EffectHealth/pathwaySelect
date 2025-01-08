@@ -268,6 +268,7 @@ body {
 <body>
 
 <div id="drag-container">
+  <div id="placeholders-area">
   <div class="row-wrapper">
 
     <!-- Row of Origins: 
@@ -331,7 +332,7 @@ body {
     </div>
   </div>
 
- 
+  </div>
 
   <!-- Absolutely positioned chips here -->
   <div id="chips-layer"></div>
@@ -573,16 +574,18 @@ function positionChipOverSlot(chipEl, slotId) {
   if (!slotEl) return;
 
   const slotRect = slotEl.getBoundingClientRect();
-  const offsetLeft = slotRect.left - dragContainerRect.left;
-  const offsetTop  = slotRect.top  - dragContainerRect.top;
+  
+  // use placeholdersRect
+  const offsetLeft = slotRect.left - placeholdersRect.left;
+  const offsetTop  = slotRect.top  - placeholdersRect.top;
 
-  // center in circle
   const centerX = offsetLeft + (slotRect.width/2) - (chipEl.offsetWidth/2);
   const centerY = offsetTop  + (slotRect.height/2) - (chipEl.offsetHeight/2);
 
   chipEl.style.left = centerX + "px";
   chipEl.style.top  = centerY + "px";
 }
+
 
 // ---------------------------
 // (3) Pointer-based Drag
@@ -596,15 +599,14 @@ let isDragging = false;
 function onPointerDown(e) {
   e.preventDefault();
 
-  // recalc in case resized
-  dragContainerRect = dragContainer.getBoundingClientRect();
+  // recalc the placeholders area
+  placeholdersRect = placeholdersArea.getBoundingClientRect();
 
   draggedChip = e.currentTarget;
   oldSlot = findSlotOfLetter(draggedChip.dataset.letter);
 
-  // top zIndex
+  // rest is the same...
   draggedChip.style.zIndex = 9999;
-
   draggedChip.setPointerCapture(e.pointerId);
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
@@ -617,25 +619,27 @@ function onPointerDown(e) {
   offsetY = e.clientY - rect.top;
 }
 
+
 function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  const relX = e.clientX - dragContainerRect.left;
-  const relY = e.clientY - dragContainerRect.top;
+  const relX = e.clientX - placeholdersRect.left; 
+  const relY = e.clientY - placeholdersRect.top;
 
   let x = relX - offsetX;
   let y = relY - offsetY;
 
-  // clamp inside container if desired
-  const maxX = dragContainerRect.width - draggedChip.offsetWidth;
-  const maxY = dragContainerRect.height - draggedChip.offsetHeight;
+  // clamp to placeholdersRect width/height, if you want
+  const maxX = placeholdersRect.width - draggedChip.offsetWidth;
+  const maxY = placeholdersRect.height - draggedChip.offsetHeight;
   x = Math.max(0, Math.min(x, maxX));
   y = Math.max(0, Math.min(y, maxY));
 
   draggedChip.style.left = x + "px";
   draggedChip.style.top  = y + "px";
 }
+
 
 function onPointerUp(e) {
   e.preventDefault();
