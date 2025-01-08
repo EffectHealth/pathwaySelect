@@ -457,12 +457,13 @@ function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  // update position: put the chip under the pointer
-  const newLeft = e.clientX - offsetX;
-  const newTop  = e.clientY - offsetY;
+  const newLeft = e.pageX - offsetX;
+  const newTop  = e.pageY - offsetY;
+
   draggedChip.style.left = newLeft + "px";
   draggedChip.style.top  = newTop + "px";
 }
+
 
 function onPointerUp(e) {
   e.preventDefault();
