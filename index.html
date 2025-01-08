@@ -458,7 +458,24 @@ function reattachDragEvents(chip) {
   return clone;
 }
 
-function addTouchEvents(chip) {
+function addDragAndTouchEvents(chip) {
+  chip.addEventListener("dragstart", (e) => {
+    draggedChip = chip;
+    draggedLetter = chip.dataset.letter;
+    oldSlot = chip.parentElement.dataset.slot;
+    didSuccessfulDrop = false;
+  });
+
+  chip.addEventListener("dragend", (e) => {
+    if (!didSuccessfulDrop) {
+      revertChip();
+    }
+    draggedChip = null;
+    draggedLetter = null;
+    oldSlot = null;
+  });
+
+  // Touch Events
   chip.addEventListener("touchstart", (e) => {
     e.preventDefault();
     draggedChip = chip;
@@ -471,7 +488,6 @@ function addTouchEvents(chip) {
     e.preventDefault();
     const touch = e.touches[0];
     draggedChip.style.position = "absolute";
-    draggedChip.style.zIndex = "1000";
     draggedChip.style.left = `${touch.pageX - 30}px`;
     draggedChip.style.top = `${touch.pageY - 30}px`;
   });
@@ -483,30 +499,23 @@ function addTouchEvents(chip) {
 
     if (target && target.classList.contains("placeholder")) {
       const targetSlot = target.dataset.slot;
-      if (slotMap[targetSlot] !== draggedLetter && validSlots[draggedLetter].includes(targetSlot)) {
+      if (validSlots[draggedLetter].includes(targetSlot)) {
         forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
         didSuccessfulDrop = true;
       }
     }
-
     draggedChip.style.position = "static";
-    draggedChip.style.zIndex = "auto";
-
     if (!didSuccessfulDrop) {
       revertChip();
     }
-
     draggedChip = null;
     draggedLetter = null;
     oldSlot = null;
   });
 }
 
-// Attach touch and drag events to the chips
-document.querySelectorAll(".chip").forEach((chip) => {
-  addDragEvents(chip);
-  addTouchEvents(chip);
-});
+// Attach drag and touch events to all chips
+document.querySelectorAll(".chip").forEach(addDragAndTouchEvents);
 
 // attach drag events to the initial 4 chips
 document.querySelectorAll(".chip").forEach(addDragEvents);
