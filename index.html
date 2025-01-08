@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Drag & Drop Pathways (No Code Display, Show Pathway Link/Image)</title>
-  <!-- Optional: Montserrat Black or any other font -->
+  <title>Drag & Drop Pathways (Desktop and Mobile)</title>
   <link 
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" 
     rel="stylesheet"
@@ -24,43 +23,43 @@
       margin-bottom: 15px;
     }
     .row-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
 
-.row {
-  display: flex;
-  justify-content: center;
-  gap: 40px; /* Space between placeholder wrappers */
-}
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 40px; /* Space between placeholder wrappers */
+    }
 
-.placeholder-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 80px; /* Ensures all wrappers have the same width */
-}
+    .placeholder-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80px; /* Ensures all wrappers have the same width */
+    }
 
-.placeholder {
-  width: 60px;
-  height: 60px;
-  border: 2px dotted #999;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .placeholder {
+      width: 60px;
+      height: 60px;
+      border: 2px dotted #999;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.placeholder-label {
-  font-weight: 900;
-  font-size: 13px;
-  color: #333;
-  text-align: center;
-  margin-top: 10px; /* Space between circle and label */
-  line-height: 1.2;
-}
+    .placeholder-label {
+      font-weight: 900;
+      font-size: 13px;
+      color: #333;
+      text-align: center;
+      margin-top: 10px; /* Space between circle and label */
+      line-height: 1.2;
+    }
     .placeholder-label span.weeks {
       font-weight: normal;
       color: #666;
@@ -74,6 +73,7 @@
       justify-content: center;
       cursor: move;
       user-select: none;
+      position: relative;
     }
     .chip img {
       width: 56px;
@@ -82,104 +82,90 @@
       pointer-events: none; 
     }
 
-/* Pathway display area */
-#pathway-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px; /* Space between the two boxes */
-  margin-top: 30px; /* Space from position rows */
-}
+    /* Pathway display area */
+    #pathway-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px; /* Space between the two boxes */
+      margin-top: 30px; /* Space from position rows */
+    }
 
-#pathway-img-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 300px; /* Same size as max-width of the image */
-  height: 170px; /* Adjusted for typical image aspect ratio */
-  background: rgba(128, 128, 128, 0.5); /* 50% transparent gray */
-  border-radius: 8px; /* Rounded corners */
-  overflow: hidden; /* Prevent overflow of content */
-}
+    #pathway-img-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 300px;
+      height: 170px;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-#pathway-button-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 300px; /* Match the width of the button */
-  height: 50px; /* Match the expected height of the button */
-  background: rgba(128, 128, 128, 0.5); /* 50% transparent gray */
-  border-radius: 8px; /* Rounded corners */
-  overflow: hidden; /* Prevent overflow of content */
-}
+    #pathway-button-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 300px;
+      height: 50px;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-#pathway-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  visibility: hidden; /* Initially hidden until loaded */
-}
+    #pathway-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      visibility: hidden; /* Initially hidden until loaded */
+    }
 
-#pathway-button {
-  display: block;
-  text-decoration: none;
-  font-weight: 900;
-  color: white;
-  background: #999966;
-  padding: 10px 20px; /* Padding to style the button */
-  border-radius: 6px;
-  visibility: hidden; /* Initially hidden until loaded */
-  transition: background 0.2s;
-}
+    #pathway-button {
+      display: block;
+      text-decoration: none;
+      font-weight: 900;
+      color: white;
+      background: #999966;
+      padding: 10px 20px;
+      border-radius: 6px;
+      visibility: hidden;
+      transition: background 0.2s;
+    }
 
-#pathway-button:hover {
-  background: #285e8e;
-}
-/* General responsive design for small devices */
-@media (max-width: 768px) {
-  .row {
-    flex-direction: row; /* Ensure rows remain horizontal */
-    flex-wrap: wrap; /* Allow wrapping if content overflows */
-    gap: 10px; /* Adjust spacing for smaller screens */
-  }
+    #pathway-button:hover {
+      background: #285e8e;
+    }
 
-  .placeholder-wrapper {
-    width: auto; /* Allow placeholders to shrink if needed */
-  }
+    @media (max-width: 768px) {
+      .row {
+        flex-wrap: wrap;
+        gap: 20px;
+      }
 
-  .placeholder {
-    width: 50px;
-    height: 50px;
-  }
+      .chip {
+        width: 48px;
+        height: 48px;
+      }
 
-  .chip {
-    width: 48px;
-    height: 48px;
-  }
+      .placeholder {
+        width: 50px;
+        height: 50px;
+      }
 
-  #pathway-display {
-    gap: 10px;
-    margin-top: 20px;
-  }
+      #pathway-display {
+        margin-top: 20px;
+        gap: 15px;
+      }
 
-  #pathway-img-box, #pathway-button-box {
-    width: 100%; /* Use full width of the iframe */
-    max-width: 300px;
-    height: auto;
-  }
-
-  #pathway-button {
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-}
-
-
+      #pathway-img-box, #pathway-button-box {
+        width: 90%;
+        max-width: 300px;
+      }
+    }
   </style>
 </head>
 <body>
-
 
 <div class="row-wrapper">
   <!-- ROW of ORIGINS (1,2,3,4) -->
@@ -234,12 +220,11 @@
 </div>
 
 <script>
-// (1) Data structures for valid slots, slot map, images for chips
 const validSlots = {
-  "1": ["origin1","a","b","c","d"],
-  "2": ["origin2","a","b","c","d"],
-  "3": ["origin3","a","b","c","d"],
-  "4": ["origin4","a","b","c","d"]
+  "1": ["origin1", "a", "b", "c", "d"],
+  "2": ["origin2", "a", "b", "c", "d"],
+  "3": ["origin3", "a", "b", "c", "d"],
+  "4": ["origin4", "a", "b", "c", "d"]
 };
 
 const slotMap = {
@@ -259,28 +244,6 @@ const images = {
   "3": "https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png",
   "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
 };
-
-// (2) Create chips initially
-function createChip(num) {
-  const div = document.createElement('div');
-  div.classList.add('chip');
-  div.dataset.letter = num;
-  div.draggable = true;
-
-  const img = document.createElement('img');
-  img.src = images[num];
-  div.appendChild(img);
-
-  return div;
-}
-
-// Place 1..4 in origin1..origin4
-["1","2","3","4"].forEach(num => {
-  const slotId = "origin" + num;  
-  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
-  const chipEl = createChip(num);
-  slotEl.appendChild(chipEl);
-});
 
 // (3) Pathways dictionary for code lookup
 const pathways = {
@@ -406,195 +369,97 @@ const pathways = {
   }
 };
 
-// (4) Drag logic
-let draggedChip = null;
-let draggedLetter = null;
-let oldSlot = null;
-let didSuccessfulDrop = false;
+function initializeDragAndDrop() {
+  let draggedChip = null;
+  let oldSlot = null;
 
-function revertChip() {
-  if (!draggedChip || !oldSlot) return;
-  forceMoveChipToSlot(draggedChip, oldSlot, oldSlot);
-  updatePathwayDisplay(); 
-}
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("dragstart", e => {
+      draggedChip = chip;
+      oldSlot = chip.parentElement.dataset.slot;
+    });
 
-// Moves a chip from fromSlot to toSlot, handling occupant logic
-function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
-  if (!chipEl) return;
-  const occupant = slotMap[toSlot];
-  if (occupant && occupant !== chipEl.dataset.letter) {
-    // remove occupant from DOM
-    const occupantChip = document.querySelector(`[data-slot='${toSlot}'] .chip`);
-    if (occupantChip) occupantChip.remove();
-    // occupant goes home if fromSlot=origin & toSlot=position, else swap
-    if (fromSlot.startsWith("origin") && ["a","b","c","d"].includes(toSlot)) {
-      const occupantHome = "origin" + occupant;
-      slotMap[toSlot] = null;
-      forceMoveChipToSlot(occupantChip, toSlot, occupantHome);
-    } else {
-      forceMoveChipToSlot(occupantChip, toSlot, fromSlot);
-    }
-  }
-  // place chipEl in toSlot
-  const targetEl = document.querySelector(`[data-slot='${toSlot}']`);
-  if (!targetEl) return;
-  while (targetEl.firstChild) {
-    targetEl.removeChild(targetEl.firstChild);
-  }
-  targetEl.appendChild(chipEl);
-  slotMap[toSlot] = chipEl.dataset.letter;
+    chip.addEventListener("dragend", e => {
+      draggedChip = null;
+      oldSlot = null;
+    });
 
-  // clear oldSlot if it was the same chip
-  if (slotMap[fromSlot] === chipEl.dataset.letter) {
-    slotMap[fromSlot] = null;
-  }
-  reattachDragEvents(chipEl);
-}
+    chip.addEventListener("touchstart", e => {
+      e.preventDefault();
+      draggedChip = chip;
+      oldSlot = chip.parentElement.dataset.slot;
+    });
 
-function reattachDragEvents(chip) {
-  const clone = chip.cloneNode(true);
-  chip.parentNode.replaceChild(clone, chip);
-  addDragEvents(clone);
-  return clone;
-}
+    chip.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      draggedChip.style.position = "absolute";
+      draggedChip.style.left = `${touch.pageX - 30}px`;
+      draggedChip.style.top = `${touch.pageY - 30}px`;
+    });
 
-function addDragAndTouchEvents(chip) {
-  chip.addEventListener("dragstart", (e) => {
-    draggedChip = chip;
-    draggedLetter = chip.dataset.letter;
-    oldSlot = chip.parentElement.dataset.slot;
-    didSuccessfulDrop = false;
-  });
-
-  chip.addEventListener("dragend", (e) => {
-    if (!didSuccessfulDrop) {
-      revertChip();
-    }
-    draggedChip = null;
-    draggedLetter = null;
-    oldSlot = null;
-  });
-
-  // Touch Events
-  chip.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    draggedChip = chip;
-    draggedLetter = chip.dataset.letter;
-    oldSlot = chip.parentElement.dataset.slot;
-    didSuccessfulDrop = false;
-  });
-
-  chip.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    draggedChip.style.position = "absolute";
-    draggedChip.style.left = `${touch.pageX - 30}px`;
-    draggedChip.style.top = `${touch.pageY - 30}px`;
-  });
-
-  chip.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    const touch = e.changedTouches[0];
-    const target = document.elementFromPoint(touch.pageX, touch.pageY);
-
-    if (target && target.classList.contains("placeholder")) {
-      const targetSlot = target.dataset.slot;
-      if (validSlots[draggedLetter].includes(targetSlot)) {
-        forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
-        didSuccessfulDrop = true;
+    chip.addEventListener("touchend", e => {
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      const target = document.elementFromPoint(touch.pageX, touch.pageY);
+      if (target && target.classList.contains("placeholder")) {
+        moveChipToSlot(draggedChip, oldSlot, target.dataset.slot);
       }
-    }
-    draggedChip.style.position = "static";
-    if (!didSuccessfulDrop) {
-      revertChip();
-    }
-    draggedChip = null;
-    draggedLetter = null;
-    oldSlot = null;
+      draggedChip.style.position = "";
+    });
+  });
+
+  document.querySelectorAll(".placeholder").forEach(placeholder => {
+    placeholder.addEventListener("dragover", e => e.preventDefault());
+
+    placeholder.addEventListener("drop", e => {
+      if (draggedChip) {
+        moveChipToSlot(draggedChip, oldSlot, placeholder.dataset.slot);
+      }
+    });
   });
 }
 
-// Attach drag and touch events to all chips
-document.querySelectorAll(".chip").forEach(addDragAndTouchEvents);
+function moveChipToSlot(chip, oldSlot, newSlot) {
+  if (!validSlots[chip.dataset.letter].includes(newSlot)) return;
+  document.querySelector(`[data-slot="${newSlot}"]`).appendChild(chip);
+  slotMap[newSlot] = chip.dataset.letter;
+  slotMap[oldSlot] = null;
+  updatePathwayDisplay();
+}
 
-// attach drag events to the initial 4 chips
-document.querySelectorAll(".chip").forEach(addDragEvents);
-
-// Placeholder drop events
-document.querySelectorAll(".placeholder").forEach(placeholder => {
-  placeholder.addEventListener("dragover", e => {
-    e.preventDefault();
-    placeholder.classList.add("drag-over");
-  });
-  placeholder.addEventListener("dragleave", e => {
-    placeholder.classList.remove("drag-over");
-  });
-  placeholder.addEventListener("drop", e => {
-    e.preventDefault();
-    placeholder.classList.remove("drag-over");
-    if (!draggedChip) return;
-
-    const targetSlot = placeholder.dataset.slot;
-    if (targetSlot === oldSlot) {
-      didSuccessfulDrop = false;
-      return;
-    }
-    if (slotMap[targetSlot] === draggedLetter) {
-      didSuccessfulDrop = false;
-      return;
-    }
-    if (!validSlots[draggedLetter].includes(targetSlot)) {
-      didSuccessfulDrop = false;
-      return;
-    }
-    forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
-    didSuccessfulDrop = true;
-    updatePathwayDisplay(); 
-  });
-});
-
-// If user drops outside placeholders => revert
-document.addEventListener("drop", e => {
-  // no preventDefault => triggers revert in dragend
-}, false);
-
-// (5) Update the displayed pathway (image + button) if all four positions are filled
 function updatePathwayDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
-  const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
-
-  const imgBoxEl = document.getElementById("pathway-img-box");
-  const imgEl = document.getElementById("pathway-img");
-  const buttonBoxEl = document.getElementById("pathway-button-box");
-  const btnEl = document.getElementById("pathway-button");
-
-  // Reset initial state (boxes remain visible but empty)
-  imgEl.src = "";
-  imgEl.style.visibility = "hidden";
-  btnEl.style.visibility = "hidden";
-
-  // If not all positions are filled, just show empty boxes
-  if (!allFilled) {
-    return;
+  const pathway = pathways[code];
+  const img = document.getElementById("pathway-img");
+  const btn = document.getElementById("pathway-button");
+  if (pathway) {
+    img.src = pathway.image;
+    img.style.visibility = "visible";
+    btn.href = pathway.url;
+    btn.textContent = pathway.title;
+    btn.style.visibility = "visible";
+  } else {
+    img.style.visibility = "hidden";
+    btn.style.visibility = "hidden";
   }
-
-  // All positions are filled => check if code is in pathways
-  const p = pathways[code];
-  if (!p) {
-    return;
-  }
-
-  // Found a match => show image and button
-  imgEl.src = p.image;
-  imgEl.style.visibility = "visible";
-  btnEl.textContent = p.title;
-  btnEl.href = p.url;
-  btnEl.style.visibility = "visible";
 }
 
+function initializeChips() {
+  Object.keys(images).forEach(num => {
+    const chip = document.createElement("div");
+    chip.classList.add("chip");
+    chip.draggable = true;
+    chip.dataset.letter = num;
+    const img = document.createElement("img");
+    img.src = images[num];
+    chip.appendChild(img);
+    document.querySelector(`[data-slot="origin${num}"]`).appendChild(chip);
+  });
+}
 
-// Initialize the display once
-updatePathwayDisplay();
+initializeChips();
+initializeDragAndDrop();
 </script>
 </body>
 </html>
