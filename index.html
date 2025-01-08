@@ -701,11 +701,13 @@ function updateDisplay() {
 
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
+  const captionEl = document.getElementById("display-caption");
 
-  // reset
+  // Reset display and caption
   imgEl.src = "";
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
+  captionEl.textContent = "";
 
   if (!allFilled) return;
 
@@ -718,6 +720,11 @@ function updateDisplay() {
   btnEl.textContent = p.title;
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
+
+  // Set caption if available
+  if (p.caption) {
+    captionEl.textContent = p.caption;
+  }
 }
 </script>
 </body>
