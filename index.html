@@ -428,30 +428,30 @@ function addPointerEvents(chip) {
 function onPointerDown(e) {
   e.preventDefault();
   draggedChip = e.currentTarget;
-  oldSlot = draggedChip.parentElement.dataset.slot; // e.g. "origin3" or "a"
+  oldSlot = draggedChip.parentElement.dataset.slot;
 
-  // bounding rect relative to viewport
   const rect = draggedChip.getBoundingClientRect();
 
-  // offset from pointer to chip's top-left
-  offsetX = e.clientX - rect.left;
-  offsetY = e.clientY - rect.top;
+  // Use pageX - ( rect.left + scrollX ) for offset
+  offsetX = e.pageX - (rect.left + window.scrollX);
+  offsetY = e.pageY - (rect.top  + window.scrollY);
 
-  // Switch to absolute so we can move it
   draggedChip.style.position = "absolute";
   draggedChip.style.zIndex = 9999;
 
-  // place it at the same screen location
-  draggedChip.style.left = rect.left + "px";
-  draggedChip.style.top  = rect.top  + "px";
+  // Place it at the same 'page' position
+  // (rect.left + scrollX) and (rect.top + scrollY) 
+  // so it doesn't jump
+  draggedChip.style.left = (rect.left + window.scrollX) + "px";
+  draggedChip.style.top  = (rect.top  + window.scrollY) + "px";
 
-  // capture pointer
   draggedChip.setPointerCapture(e.pointerId);
 
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
   isDragging = true;
 }
+
 
 function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
