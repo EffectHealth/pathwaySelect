@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Drag & Drop in Single Container</title>
+  <title>PointerEvents Drag & Drop - Single Container, No Offsets</title>
   <link 
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" 
     rel="stylesheet"
@@ -21,28 +21,29 @@
       margin: 0;
       padding: 0;
       background: #fafafa;
+      width: 100%;
+      min-height: 100vh;
     }
     body {
-      /* We'll center the container and give some top margin */
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      min-height: 100vh;
       padding-top: 20px;
+      color: #333;
     }
 
-    /* The main container that holds everything */
+    /* The container that holds everything */
     #drag-container {
-      position: relative; /* Important so children can use absolute coords */
-      width: 600px;       /* Or whatever width you prefer */
-      min-height: 600px;  /* Enough height to hold the placeholders & final display */
+      position: relative; /* Important so chips can use absolute coords */
+      width: 800px;       /* Or whatever width you prefer */
+      min-height: 700px;  /* Enough height for placeholders & display */
       border: 2px solid #ccc;
       background: #fff;
       margin-bottom: 40px; /* Some space at bottom */
-      overflow: hidden;    /* Hide anything that drags outside */
+      overflow: hidden;    /* Hide chips if they go out of bounds */
     }
 
-    /* Basic layout inside the container */
+    /* The actual layout of placeholders is normal flow inside #drag-container */
     .row-wrapper {
       display: flex;
       flex-direction: column;
@@ -53,7 +54,7 @@
     .row {
       display: flex;
       justify-content: center;
-      gap: 40px;
+      gap: 40px; /* Space between placeholder wrappers */
     }
     .placeholder-wrapper {
       display: flex;
@@ -61,7 +62,6 @@
       align-items: center;
       width: 80px;
     }
-
     .placeholder {
       width: 60px;
       height: 60px;
@@ -72,7 +72,6 @@
       justify-content: center;
       position: relative;
     }
-
     .placeholder-label {
       font-weight: 900;
       font-size: 13px;
@@ -86,6 +85,16 @@
       color: #666;
     }
 
+    /* The chips will live in an absolutely positioned layer on top of everything */
+    #chips-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* We'll let .chip handle pointer events */
+    }
+
     .chip {
       width: 56px;
       height: 56px;
@@ -93,9 +102,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute; /* We'll always keep them absolute inside #drag-container */
-      touch-action: none;
+      position: absolute; /* inside #chips-layer */
+      touch-action: none; 
       cursor: grab;
+      pointer-events: auto; /* so we can drag it (override parent's none) */
     }
     .chip:active {
       cursor: grabbing;
@@ -114,7 +124,7 @@
       align-items: center;
       justify-content: center;
       gap: 20px;
-      margin-top: 20px;
+      margin-top: 30px;
     }
     #pathway-img-box {
       display: flex;
@@ -161,15 +171,11 @@
     @media (max-width: 768px) {
       #drag-container {
         width: 90%;
-        min-height: 500px; 
+        min-height: 600px;
       }
       .row {
         flex-direction: column;
         gap: 20px;
-      }
-      .placeholder-wrapper {
-        width: 100%;
-        align-items: center;
       }
       .placeholder {
         width: 50px;
@@ -193,8 +199,7 @@
 <body>
 
 <div id="drag-container">
-  <!-- All placeholders + final display are inside #drag-container -->
-
+  <!-- Normal HTML layout for placeholders, positions, display -->
   <div class="row-wrapper">
     <!-- ROW of ORIGINS (1,2,3,4) -->
     <div class="row">
@@ -237,7 +242,6 @@
     </div>
   </div>
 
-  <!-- Pathway display area -->
   <div id="pathway-display">
     <div id="pathway-img-box">
       <img id="pathway-img" src="" alt="Pathway Image">
@@ -246,14 +250,15 @@
       <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
     </div>
   </div>
+
+  <!-- A layer for absolutely positioned chips -->
+  <div id="chips-layer"></div>
 </div>
 
 <script>
-// -----------------------------------------
-// (1) Data and Setup
-// -----------------------------------------
-const dragContainer = document.getElementById("drag-container");
-
+// =========================================
+// (1) Data Setup
+// =========================================
 const validSlots = {
   "1": ["origin1","a","b","c","d"],
   "2": ["origin2","a","b","c","d"],
@@ -407,54 +412,62 @@ const pathways = {
   }
 };
 
-// -----------------------------------------
-// (3) Create Chips in origin slots
-// -----------------------------------------
-["1","2","3","4"].forEach(num => {
-  const slotId = "origin" + num;  
-  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
-  const chipEl = createChip(num);
-  // We'll place the chip initially *over* the placeholder.
-  // We'll compute the placeholder's position inside #drag-container
-  // and absolutely position the chip there.
-  slotEl.appendChild(chipEl);
-  positionChipOverPlaceholder(chipEl, slotEl);
+const chipsLayer = document.getElementById("chips-layer");
+const dragContainerRect = document.getElementById("drag-container").getBoundingClientRect();
+
+// =========================================
+// (2) Create Chips and place them over origin placeholders
+// =========================================
+["1", "2", "3", "4"].forEach(letter => {
+  createChip(letter, `origin${letter}`);
 });
 
-function createChip(num) {
-  const div = document.createElement("div");
-  div.classList.add("chip");
-  div.dataset.letter = num;
+function createChip(letter, slotId) {
+  const chipDiv = document.createElement("div");
+  chipDiv.classList.add("chip");
+  chipDiv.dataset.letter = letter;
 
-  // Add the image
   const img = document.createElement("img");
-  img.src = images[num];
-  div.appendChild(img);
+  img.src = images[letter];
+  chipDiv.appendChild(img);
 
-  // Add pointer events
-  div.addEventListener("pointerdown", onPointerDown);
+  // Place the chip in the DOM's #chips-layer
+  chipsLayer.appendChild(chipDiv);
 
-  return div;
+  // Position the chip over the placeholder
+  positionChipOverSlot(chipDiv, slotId);
+
+  // Add pointerdown
+  chipDiv.addEventListener("pointerdown", onPointerDown);
 }
 
-// This function absolutely positions the chip over a placeholder
-function positionChipOverPlaceholder(chipEl, placeholderEl) {
-  // measure container + placeholder
-  const containerRect = dragContainer.getBoundingClientRect();
-  const placeholderRect = placeholderEl.getBoundingClientRect();
+// Position the chip's .style.left/top so it's centered on the given slot
+function positionChipOverSlot(chipEl, slotId) {
+  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
+  if (!slotEl) return;
 
-  // The placeholder's coords relative to #drag-container
-  const offsetLeft = placeholderRect.left - containerRect.left;
-  const offsetTop  = placeholderRect.top  - containerRect.top;
+  // measure the slot relative to the container
+  const slotRect = slotEl.getBoundingClientRect();
 
-  // Move the chip on top of that placeholder
-  chipEl.style.left = offsetLeft + "px";
-  chipEl.style.top  = offsetTop + "px";
+  // the container's offset (top-left)
+  const cx = dragContainerRect.left;
+  const cy = dragContainerRect.top;
+
+  // center the chip in that slot
+  const centerX = slotRect.left + slotRect.width / 2 - cx - (chipEl.offsetWidth / 2);
+  const centerY = slotRect.top + slotRect.height / 2 - cy - (chipEl.offsetHeight / 2);
+
+  chipEl.style.left = centerX + "px";
+  chipEl.style.top  = centerY + "px";
 }
 
-// -----------------------------------------
-// (4) Pointer-based Drag Logic
-// -----------------------------------------
+// Mark that the slot is occupied
+// NOTE: we've already set slotMap to have "1","2","3","4" in origin1..4
+// so we're good.
+
+// =========================================
+// (3) Pointer-based Drag Logic
+// =========================================
 let draggedChip = null;
 let oldSlot = null;
 let offsetX = 0;
@@ -463,46 +476,37 @@ let isDragging = false;
 
 function onPointerDown(e) {
   e.preventDefault();
-  if (!e.currentTarget.classList.contains("chip")) return;
-
   draggedChip = e.currentTarget;
-  oldSlot = draggedChip.parentElement.dataset.slot; // might be "origin1" or "a", etc.
+  const letter = draggedChip.dataset.letter;
+
+  oldSlot = findSlotOfLetter(letter); // e.g. 'origin1' or 'a'
+
+  // We'll track pointer events on the chip
   draggedChip.setPointerCapture(e.pointerId);
-
-  // measure container + chip
-  const containerRect = dragContainer.getBoundingClientRect();
-  const chipRect = draggedChip.getBoundingClientRect();
-
-  // offset between pointer and top-left of chip
-  offsetX = e.clientX - chipRect.left;
-  offsetY = e.clientY - chipRect.top;
-
-  // We'll track pointermove/pointerup on the chip
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
   isDragging = true;
+
+  // compute offset from pointer to the chip's left/top
+  const chipRect = draggedChip.getBoundingClientRect();
+  offsetX = e.clientX - chipRect.left;
+  offsetY = e.clientY - chipRect.top;
 }
 
 function onPointerMove(e) {
-  if (!draggedChip || !isDragging) return;
+  if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  const containerRect = dragContainer.getBoundingClientRect();
+  // move the chip so its top-left is at pointer - offset
+  const x = e.clientX - dragContainerRect.left - offsetX;
+  const y = e.clientY - dragContainerRect.top  - offsetY;
 
-  // pointer coords relative to container
-  const pointerX = e.clientX - containerRect.left;
-  const pointerY = e.clientY - containerRect.top;
+  // keep within container if desired
+  const maxX = dragContainerRect.width - draggedChip.offsetWidth;
+  const maxY = dragContainerRect.height - draggedChip.offsetHeight;
 
-  // subtract offset so the chip doesn't jump
-  const newLeft = pointerX - offsetX;
-  const newTop  = pointerY - offsetY;
-
-  // keep chip in container bounds if you want
-  const maxLeft = containerRect.width - draggedChip.offsetWidth;
-  const maxTop  = containerRect.height - draggedChip.offsetHeight;
-
-  draggedChip.style.left = Math.max(0, Math.min(maxLeft, newLeft)) + "px";
-  draggedChip.style.top  = Math.max(0, Math.min(maxTop,  newTop))  + "px";
+  draggedChip.style.left = Math.max(0, Math.min(x, maxX)) + "px";
+  draggedChip.style.top  = Math.max(0, Math.min(y, maxY)) + "px";
 }
 
 function onPointerUp(e) {
@@ -514,33 +518,30 @@ function onPointerUp(e) {
   draggedChip.removeEventListener("pointerup", onPointerUp);
   isDragging = false;
 
-  // figure out final drop
-  const x = e.clientX;
-  const y = e.clientY;
-  let target = document.elementFromPoint(x, y);
-
-  // if over another chip, go up to its parent placeholder
+  // detect final drop target
+  let target = document.elementFromPoint(e.clientX, e.clientY);
   if (target && target.classList.contains("chip")) {
-    target = target.parentElement;
+    target = target.parentElement; // go up
   }
 
-  // If it's a valid placeholder:
+  const letter = draggedChip.dataset.letter;
+  // check if it's a .placeholder
   if (target && target.classList.contains("placeholder")) {
     const targetSlot = target.dataset.slot;
-    const letter = draggedChip.dataset.letter;
-
-    // only accept dropping onto a,b,c,d if valid
-    if (["a","b","c","d"].includes(targetSlot) &&
-        validSlots[letter].includes(targetSlot) &&
-        slotMap[targetSlot] !== letter) {
+    if (
+      ["a","b","c","d"].includes(targetSlot) &&
+      validSlots[letter].includes(targetSlot) &&
+      slotMap[targetSlot] !== letter
+    ) {
       // occupant logic
       const occupant = slotMap[targetSlot];
       if (occupant) {
         // occupant goes home
-        const occupantChip = document.querySelector(`[data-slot='${targetSlot}'] .chip`);
-        if (occupantChip) occupantChip.remove(); // remove from DOM
+        const occupantChip = findChipByLetter(occupant);
+        if (occupantChip) {
+          forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
+        }
         slotMap[targetSlot] = null;
-        forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
       }
       // place dragged chip in that slot
       forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
@@ -551,56 +552,62 @@ function onPointerUp(e) {
     }
   }
 
-  // otherwise revert to origin
-  revertChip();
-}
-
-function revertChip() {
-  if (!draggedChip) return;
-  const letter = draggedChip.dataset.letter;
-  const home = originSlot(letter);
-  forceMoveChipToSlot(draggedChip, oldSlot, home);
+  // else revert
+  revertChip(draggedChip, oldSlot);
   draggedChip = null;
   oldSlot = null;
-  isDragging = false;
   updatePathwayDisplay();
 }
 
-// Move the chipEl into toSlot (which might be a, b, c, d, or origin#)
+function revertChip(chipEl, fromSlot) {
+  // send chip back to origin
+  const letter = chipEl.dataset.letter;
+  const home = originSlot(letter);
+  forceMoveChipToSlot(chipEl, fromSlot, home);
+}
+
 function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
-  if (!chipEl) return;
+  // If occupant in toSlot, occupant goes home (but we do that above)
+  // Actually let's just do occupant logic here to be safe:
   const occupant = slotMap[toSlot];
   if (occupant && occupant !== chipEl.dataset.letter) {
-    // occupant goes home
-    const occupantChip = document.querySelector(`[data-slot='${toSlot}'] .chip`);
-    if (occupantChip) occupantChip.remove();
+    // occupant -> occupant's home
+    const occupantChip = findChipByLetter(occupant);
+    if (occupantChip) {
+      forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
+    }
     slotMap[toSlot] = null;
-    forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
   }
-  // Put the chipEl physically over that placeholder in the container
-  const placeholderEl = document.querySelector(`[data-slot='${toSlot}']`);
-  if (!placeholderEl) return;
 
-  // Remove any child from the placeholder
-  while (placeholderEl.firstChild) {
-    placeholderEl.removeChild(placeholderEl.firstChild);
-  }
-  // Put the chipEl inside that placeholder
-  placeholderEl.appendChild(chipEl);
+  // place chip in toSlot
   slotMap[toSlot] = chipEl.dataset.letter;
-
-  // Absolutely position the chip over the placeholder
-  positionChipOverPlaceholder(chipEl, placeholderEl);
-
-  // Clear old slot if it was the same chip
+  // remove fromSlot if needed
   if (slotMap[fromSlot] === chipEl.dataset.letter) {
     slotMap[fromSlot] = null;
   }
+  // physically move the chip over that slot
+  positionChipOverSlot(chipEl, toSlot);
 }
 
-// -----------------------------------------
-// (5) Update the displayed Pathway
-// -----------------------------------------
+// finds which slot currently has a certain letter
+function findSlotOfLetter(letter) {
+  for (const slot in slotMap) {
+    if (slotMap[slot] === letter) {
+      return slot;
+    }
+  }
+  return null; // not found
+}
+
+function findChipByLetter(letter) {
+  // find the .chip with that data-letter
+  return Array.from(document.querySelectorAll(".chip"))
+    .find(chip => chip.dataset.letter === letter);
+}
+
+// =========================================
+// (4) Update Pathway
+// =========================================
 function updatePathwayDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
   const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
@@ -608,26 +615,21 @@ function updatePathwayDisplay() {
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
 
-  // Reset
   imgEl.src = "";
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
 
-  if (!allFilled) return; // not all 4 positions filled
+  if (!allFilled) return;
 
   const p = pathways[code];
-  if (!p) return; // code not found
+  if (!p) return;
 
-  // Show the matched image/button
   imgEl.src = p.image;
   imgEl.style.visibility = "visible";
   btnEl.textContent = p.title;
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
 }
-
-// (6) Initialize any final UI
-updatePathwayDisplay();
 </script>
 </body>
 </html>
