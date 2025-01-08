@@ -198,28 +198,49 @@ body {
   padding-top: 13.82%;
 }
 
-/* The button absolutely fills that link box */
-#pathway-button {
-  position: absolute;
-  top: 0; 
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* 1) The new caption box */
+#display-caption-box {
+  width: 75vw;
+  max-width: 600px;
+  margin: 1em auto 0 auto; /* a bit of spacing above, center horizontally */
+  background: rgba(128, 128, 128, 0.1); 
+  border-radius: 8px;
+  padding: 1em;
+  text-align: center;
+  display: none; /* hidden by default; we'll show it if a caption is found */
+}
 
+/* The caption text */
+#pathway-caption {
+  color: #333;
+  font-size: 1rem;  /* base font size on desktop */
+  line-height: 1.4;
+  margin: 0;        /* remove default <p> margins if desired */
+  /* If you want it to scale fluidly, you could do e.g.: 
+     font-size: clamp(0.8rem, 2vw, 1.2rem);
+  */
+}
+
+/* 2) Scale the button text 
+   Instead of a fixed 2vw, use clamp(...) so 
+   it never gets too tiny or huge. For example:
+*/
+#pathway-button {
+  /* remove your old font-size: 2vw; replace with clamp: */
+  font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+
+  /* everything else remains the same: */
   text-decoration: none;
   font-weight: 900;
   color: #fff;
   background: #999966;
   border-radius: 6px;
-  visibility: hidden;
   transition: background 0.2s;
-
-  /* center the text with flex */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2vw; 
   text-align: center;
+  visibility: hidden;
 }
 #pathway-button:hover {
   background: #285e8e;
@@ -319,6 +340,11 @@ body {
       <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
     </div>
   </div>
+   <!-- NEW CAPTION BOX -->
+  <div id="display-caption-box">
+    <p id="pathway-caption"></p>
+  </div>
+</div>
 
   <!-- Absolutely positioned chips here -->
   <div id="chips-layer"></div>
@@ -363,122 +389,146 @@ const pathways = {
   "1234": {
     title: "Preventative Health: Foundation Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-foundation-pathway-1234",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/784/1735430581.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/784/1735430581.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "1243": {
     title: "Preventative Health: Energy Flow Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-energy-flow-pathway-1243",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/790/1735430889.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/790/1735430889.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "1324": {
     title: "Preventative Health: Balance Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-balance-pathway-1324",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/791/1735431019.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/791/1735431019.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "1342": {
     title: "Preventative Health: Renewal Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-renewal-pathway-1342",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/793/1735431430.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/793/1735431430.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "1423": {
     title: "Preventative Health: Vital Core Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-vital-core-pathway-1423",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/794/1735431673.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/794/1735431673.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "1432": {
     title: "Preventative Health: Tranquility Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-tranquility-pathway-1432",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/795/1735431780.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/795/1735431780.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2134": {
     title: "Preventative Health: Wellness Anchor Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-wellness-anchor-pathway-2134",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/796/1735432010.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/796/1735432010.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2143": {
     title: "Preventative Health: Synergy Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-synergy-pathway-2143",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/797/1735432164.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/797/1735432164.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2314": {
     title: "Preventative Health: Harmony Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-harmony-pathway-2314",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/798/1735432274.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/798/1735432274.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2341": {
     title: "Preventative Health: Resilience Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-resilience-pathway-2341",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/799/1735432407.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/799/1735432407.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2413": {
     title: "Preventative Health: Empower Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-empower-pathway-2413",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/800/1735432527.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/800/1735432527.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "2431": {
     title: "Preventative Health: Clarity Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-clarity-pathway-2431",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/801/1735432633.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/801/1735432633.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3124": {
     title: "Preventative Health: Dream Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-dream-pathway-3124",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/802/1735433070.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/802/1735433070.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3142": {
     title: "Preventative Health: Flow Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-flow-pathway-3142",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/803/1735433170.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/803/1735433170.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3214": {
     title: "Preventative Health: Thrive Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-thrive-pathway-3214",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/804/1735433258.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/804/1735433258.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3241": {
     title: "Preventative Health: Serenity Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-serenity-pathway-3241",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3412": {
     title: "Preventative Health: Adaptation Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-adaptation-pathway-3412",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "3421": {
     title: "Preventative Health: Recovery Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-recovery-pathway-3421",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/807/1735433759.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/807/1735433759.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4123": {
     title: "Preventative Health: Strength Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-strength-pathway-4123",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/808/1735433900.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/808/1735433900.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4132": {
     title: "Preventative Health: Equilibrium Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-equilibrium-pathway-4132",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/809/1735433977.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/809/1735433977.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4213": {
     title: "Preventative Health: Resolve Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-resolve-pathway-4213",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/810/1735434253.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/810/1735434253.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4231": {
     title: "Preventative Health: Compass Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-compass-pathway-4231",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/811/1735434322.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/811/1735434322.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4312": {
     title: "Preventative Health: Endurance Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-endurance-pathway-4312",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/812/1735434427.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/812/1735434427.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   },
   "4321": {
     title: "Preventative Health: Zenith Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-zenith-pathway-4321",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/813/1735434511.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/813/1735434511.original.png",
+    caption: "Achieve unity and balance with Harmony. Start with nutrition..."
   }
 };
 
@@ -694,23 +744,35 @@ function updateDisplay() {
 
   const imgEl = document.getElementById("pathway-img");
   const btnEl = document.getElementById("pathway-button");
+  const captionBox = document.getElementById("display-caption-box");
+  const captionEl = document.getElementById("pathway-caption");
 
-  // reset
+  // reset everything
   imgEl.src = "";
   imgEl.style.visibility = "hidden";
   btnEl.style.visibility = "hidden";
+  captionBox.style.display = "none"; // hide by default
+  captionEl.textContent = "";
 
   if (!allFilled) return;
 
   const p = pathways[code];
   if (!p) return;
 
+  // Show the image
   imgEl.src = p.image;
   imgEl.style.visibility = "visible";
 
+  // Show the button
   btnEl.textContent = p.title;
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
+
+  // If there's a caption, show it
+  if (p.caption) {
+    captionEl.textContent = p.caption;
+    captionBox.style.display = "block"; // now the caption is visible
+  }
 }
 </script>
 </body>
