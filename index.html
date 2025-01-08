@@ -2,316 +2,240 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Final Drag & Drop: Ghost Chips + Transparent + Matching Width</title>
+  <title>Final Drag & Drop with Caption</title>
   <style>
-    /* 1) Global reset + no text selection */
-/* 1) Global reset + no text selection */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-user-drag: none;
-  -webkit-touch-callout: none;
-  font-family: sans-serif;
-}
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      font-family: sans-serif;
+    }
 
-/* 2) Basic body styling */
-body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 20px;
-  min-height: 100vh;
-  background: #fafafa;
-}
+    /* Basic Body Styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 20px;
+      min-height: 100vh;
+      background: #fafafa;
+    }
 
-/* 
-   #drag-container
-   - Transparent
-   - No border
-   - 100% width (with optional max-width)
-   - Enough height to fit placeholders & final boxes
-*/
-#drag-container {
-  position: relative;
-  width: 100%;
-  max-width: 800px;       /* optional upper bound */
-  min-height: 60vh;       /* optional vertical size */
-  background: transparent;
-  border: none;
-  margin-bottom: 40px;
-  overflow: hidden;       /* hide scrollbars for absolutely-pos chips */
-}
+    /* Drag Container */
+    #drag-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      min-height: 60vh;
+      background: transparent;
+      border: none;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
 
-/* 
-   Placeholders in rows
-   4 placeholders each 15vw wide + 3 gaps of 5vw = 75vw total
-*/
-.row-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3vh;
-  margin-top: 3vh;
-}
-.row {
-  display: flex;
-  justify-content: center;
-  gap: 5vw;  /* 3 x 5vw = 15vw total gap */
-}
-.placeholder-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 15vw;     /* each placeholder */
-  max-width: 80px; /* cap so it doesn't get enormous on big screens */
-}
-.placeholder {
-  position: relative; /* so .ghost can be absolute */
-  width: 15vw;
-  height: 15vw;
-  max-width: 80px;
-  max-height: 80px;
-  border: 2px dotted #999;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.placeholder-label {
-  text-align: center;
-  font-weight: 900;
-  margin-top: 10px;
-  font-size: 2vw; 
-  max-font-size: 16px; /* non-standard but sometimes used as a note */
-}
+    /* Row Wrappers */
+    .row-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3vh;
+      margin-top: 3vh;
+    }
 
-/* Ghost images at 25% opacity in each origin slot */
-.ghost {
-  position: absolute;
-  top: 0; 
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.25;
-  pointer-events: none;
-  border-radius: 50%;
-  object-fit: cover;
-}
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 5vw;
+    }
 
-/* The chips layer for dragging: absolute, with pointer-events: none */
-#chips-layer {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* placeholders behind it are clickable */
-}
+    .placeholder-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 15vw;
+      max-width: 80px;
+    }
 
-/* Draggable chips match placeholders (15vw, max 80px) */
-.chip {
-  position: absolute;
-  width: 15vw;
-  height: 15vw;
-  max-width: 80px;
-  max-height: 80px;
-  border-radius: 50%;
-  background: #ccc;
-  cursor: grab;
-  pointer-events: auto; 
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: none;
-}
-.chip:active {
-  cursor: grabbing;
-}
-.chip img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  pointer-events: none;
-  object-fit: cover;
-}
+    .placeholder {
+      position: relative;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border: 2px dotted #999;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-/* 
-   Final display area => 75vw wide 
-   but we are REMOVING the forced aspect ratio for the pathway image
-   so it displays in full 
-*/
-#display-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3vh;
-  margin-top: 30px;
-}
+    .placeholder-label {
+      text-align: center;
+      font-weight: 900;
+      margin-top: 10px;
+      font-size: clamp(0.8rem, 2vw, 1.2rem);
+    }
 
-/* 
-   #display-box for the PATHWAY IMAGE:
-   - 75vw wide (capped at 600px) 
-   - Height auto => the image keeps its full ratio, no cropping
-*/
-#display-box {
-  width: 75vw;
-  max-width: 600px;
-  /* Make it preserve 38:21 = ~1.8095 aspect ratio */
-  aspect-ratio: 38 / 21;
+    /* Ghost Images */
+    .ghost {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.25;
+      pointer-events: none;
+      border-radius: 50%;
+      object-fit: cover;
+    }
 
-  margin: 0 auto;
-  background: rgba(128, 128, 128, 0.5);
-  border-radius: 8px;
-  overflow: hidden;
-}
+    /* Chips Layer */
+    #chips-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-/* Make the img fill that aspect-ratio box */
-#pathway-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;  /* or "contain" if you don't want cropping */
-  visibility: hidden; /* JS makes it visible once loaded */
-  display: block;     /* ensures no extra bottom gap */
-}
+    /* Chips */
+    .chip {
+      position: absolute;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: grab;
+      pointer-events: auto;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
 
+    .chip:active {
+      cursor: grabbing;
+    }
 
-/* 
-   #display-link-box for the BUTTON:
-   You said you like the wide short ratio, so we keep it 
-   => 75vw wide, ratio ~152:21 => padding-top ~13.82%
-*/
-#display-link-box {
-  width: 75vw;
-  max-width: 600px;
-  position: relative;
-  margin: 0 auto;
-  background: rgba(128, 128, 128, 0.5);
-  border-radius: 8px;
-  overflow: hidden;
+    .chip img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      pointer-events: none;
+      object-fit: cover;
+    }
 
-  /* 21/152 => ~0.138 => 13.82% => the "aspect ratio" trick */
-  padding-top: 13.82%;
-}
+    /* Final Display Area */
+    #display-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3vh;
+      margin-top: 30px;
+    }
 
-/* 1) The new caption box */
-#display-caption-box {
-  width: 75vw;
-  max-width: 600px;
-  margin: 1em auto 0 auto; /* a bit of spacing above, center horizontally */
-  background: rgba(128, 128, 128, 0.1); 
-  border-radius: 8px;
-  padding: 1em;
-  text-align: center;
-  display: none; /* hidden by default; we'll show it if a caption is found */
-}
+    /* Pathway Image Box */
+    #display-box {
+      width: 75vw;
+      max-width: 600px;
+      aspect-ratio: 38 / 21;
+      margin: 0 auto;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-/* The caption text */
-#pathway-caption {
-  color: #333;
-  font-size: 1rem;  /* base font size on desktop */
-  line-height: 1.4;
-  margin: 0;        /* remove default <p> margins if desired */
-  /* If you want it to scale fluidly, you could do e.g.: 
-     font-size: clamp(0.8rem, 2vw, 1.2rem);
-  */
-}
+    #pathway-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      visibility: hidden;
+      display: block;
+    }
 
-/* 2) Scale the button text 
-   Instead of a fixed 2vw, use clamp(...) so 
-   it never gets too tiny or huge. For example:
-*/
-#pathway-button {
-  /* remove your old font-size: 2vw; replace with clamp: */
-  font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+    /* Button Box */
+    #display-link-box {
+      width: 75vw;
+      max-width: 600px;
+      position: relative;
+      margin: 0 auto;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+      padding-top: 13.82%;
+    }
 
-  /* everything else remains the same: */
-  text-decoration: none;
-  font-weight: 900;
-  color: #fff;
-  background: #999966;
-  border-radius: 6px;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  visibility: hidden;
-}
-#pathway-button:hover {
-  background: #285e8e;
-}
+    #pathway-button {
+      font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+      text-decoration: none;
+      font-weight: 900;
+      color: #fff;
+      background: #999966;
+      border-radius: 6px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      visibility: hidden;
+    }
 
+    #pathway-button:hover {
+      background: #285e8e;
+    }
 
-
-    /* 
-      NOTE: 
-      If you want the final display area to match the 
-      total width of the row of placeholders (like 4 placeholders wide), 
-      you could do something like:
-      
-      #display-box, #display-link-box {
-        width: 75vw; 
-        max-width: 400px; 
-      }
-
-      Because 4 placeholders @15vw each = 60vw + 
-      3 gaps @5vw each = 15vw => 75vw total. 
-      Adjust to taste.
-    */
+    /* Caption Box */
+    #display-caption-box {
+      width: 75vw;
+      max-width: 600px;
+      margin: 1em auto 0 auto;
+      text-align: center;
+      display: none;
+      font-size: 1rem;
+      color: #333;
+    }
   </style>
 </head>
 <body>
 
 <div id="drag-container">
-  <div id="placeholders-area">
   <div class="row-wrapper">
-
-    <!-- Row of Origins: 
-         Each .placeholder has a .ghost image at 25% opacity
-         matching the chip image. 
-         That ghost never moves. 
-    -->
     <div class="row">
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin1">
-          <img class="ghost" 
-               src="https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png"
-               alt="Ghost 1">
+          <img class="ghost" src="https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png" alt="Ghost 1">
         </div>
         <div class="placeholder-label">Physical Activity</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin2">
-          <img class="ghost"
-               src="https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png"
-               alt="Ghost 2">
+          <img class="ghost" src="https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png" alt="Ghost 2">
         </div>
         <div class="placeholder-label">Nutrition</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin3">
-          <img class="ghost"
-               src="https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png"
-               alt="Ghost 3">
+          <img class="ghost" src="https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png" alt="Ghost 3">
         </div>
         <div class="placeholder-label">Restful Sleep</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin4">
-          <img class="ghost"
-               src="https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
-               alt="Ghost 4">
+          <img class="ghost" src="https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png" alt="Ghost 4">
         </div>
         <div class="placeholder-label">Stress</div>
       </div>
     </div>
-
-    <!-- Row of Positions (a,b,c,d) -->
     <div class="row">
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="a"></div>
@@ -331,60 +255,22 @@ body {
       </div>
     </div>
   </div>
-
-  </div>
-
-  <!-- Absolutely positioned chips here -->
   <div id="chips-layer"></div>
 </div>
-   <!-- Example final display area -->
-  <div id="display-area">
-    <div id="display-box">
-      <img id="pathway-img" src="" alt="Pathway Image">
-    </div>
-    <div id="display-link-box">
-      <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
-    </div>
+
+<div id="display-area">
+  <div id="display-box">
+    <img id="pathway-img" src="" alt="Pathway Image">
   </div>
-   <!-- NEW CAPTION BOX -->
+  <div id="display-link-box">
+    <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
+  </div>
   <div id="display-caption-box">
     <p id="pathway-caption"></p>
   </div>
 </div>
 
 <script>
-// ---------------------------
-// (1) Data + Setup
-// ---------------------------
-const validSlots = {
-  "1": ["origin1","a","b","c","d"],
-  "2": ["origin2","a","b","c","d"],
-  "3": ["origin3","a","b","c","d"],
-  "4": ["origin4","a","b","c","d"]
-};
-
-const slotMap = {
-  origin1: "1",
-  origin2: "2",
-  origin3: "3",
-  origin4: "4",
-  a: null,
-  b: null,
-  c: null,
-  d: null
-};
-
-function originSlot(letter) {
-  return "origin" + letter;
-}
-
-// Images for actual chips
-const images = {
-  "1": "https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png",
-  "2": "https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png",
-  "3": "https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png",
-  "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
-};
 
 // (3) Pathways dictionary for code lookup
 const pathways = {
@@ -895,37 +781,21 @@ function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
 // (4) Update Display
 // ---------------------------
 function updateDisplay() {
-  const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
-  const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
+    const imgEl = document.getElementById("pathway-img");
+    const btnEl = document.getElementById("pathway-button");
+    const captionBox = document.getElementById("display-caption-box");
+    const captionEl = document.getElementById("pathway-caption");
 
-  const imgEl = document.getElementById("pathway-img");
-  const btnEl = document.getElementById("pathway-button");
-  const captionBox = document.getElementById("display-caption-box");
-  const captionEl = document.getElementById("pathway-caption");
-
-  imgEl.src = "";
-  imgEl.style.visibility = "hidden";
-  btnEl.style.visibility = "hidden";
-  captionBox.style.display = "none";
-
-  if (!allFilled) return;
-
-  const p = pathways[code];
-  if (!p) return;
-
-  imgEl.src = p.image;
-  imgEl.style.visibility = "visible";
-
-  btnEl.textContent = p.title;
-  btnEl.href = p.url;
-  btnEl.style.visibility = "visible";
-
-  if (p.caption) {
-    captionEl.textContent = p.caption;
+    imgEl.src = pathways["1234"].image;
+    imgEl.style.visibility = "visible";
+    btnEl.textContent = pathways["1234"].title;
+    btnEl.href = pathways["1234"].url;
+    btnEl.style.visibility = "visible";
+    captionEl.textContent = pathways["1234"].caption;
     captionBox.style.display = "block";
   }
-}
 
+  updateDisplay(); // Test the caption
 </script>
 </body>
 </html>
