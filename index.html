@@ -2,47 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PointerEvents Drag & Drop - Always Re-droppable Chips</title>
-  <link 
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" 
-    rel="stylesheet"
-  >
+  <title>Final Drag & Drop: Accurate Pointer + Redrop</title>
   <style>
     * {
-      font-family: 'Montserrat', sans-serif;
-      margin: 0; 
+      margin: 0;
       padding: 0;
       box-sizing: border-box;
       user-select: none;
       -webkit-user-drag: none;
       -webkit-touch-callout: none;
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #fafafa;
-      width: 100%;
-      min-height: 100vh;
+      font-family: sans-serif;
     }
     body {
       display: flex;
       justify-content: center;
       align-items: flex-start;
       padding-top: 20px;
-      color: #333;
+      min-height: 100vh;
+      background: #fafafa;
     }
 
-    /* The container that holds everything */
+    /* The main container with position:relative */
     #drag-container {
-      position: relative; /* Important so chips can use absolute coords */
-      width: 800px;       /* Adjust as needed */
-      min-height: 700px;  /* Enough height for placeholders & display */
+      position: relative;
+      width: 800px;
+      min-height: 700px;
       border: 2px solid #ccc;
       background: #fff;
       margin-bottom: 40px;
       overflow: hidden;
     }
 
+    /* Placeholders in normal flow (like your row/column structure) */
     .row-wrapper {
       display: flex;
       flex-direction: column;
@@ -72,19 +63,12 @@
       position: relative;
     }
     .placeholder-label {
-      font-weight: 900;
-      font-size: 13px;
-      color: #333;
       text-align: center;
+      font-weight: 900;
       margin-top: 10px;
-      line-height: 1.2;
-    }
-    .placeholder-label span.weeks {
-      font-weight: normal;
-      color: #666;
     }
 
-    /* The chips layer */
+    /* We keep chips in an absolute layer on top */
     #chips-layer {
       position: absolute;
       left: 0;
@@ -95,17 +79,18 @@
     }
 
     .chip {
+      position: absolute;
       width: 56px;
       height: 56px;
       border-radius: 50%;
+      background: #ccc;
+      cursor: grab;
+      pointer-events: auto; /* override parent's none so chip is clickable */
+      z-index: 10;          /* keep above placeholders */
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute; /* inside #chips-layer */
-      touch-action: none; 
-      cursor: grab;
-      pointer-events: auto; /* so we can drag it (override parent's none) */
-      z-index: 10;          /* so chip is above the placeholder */
+      touch-action: none;
     }
     .chip:active {
       cursor: grabbing;
@@ -114,49 +99,47 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      pointer-events: none; 
+      pointer-events: none;
     }
 
-    /* Pathway display area */
-    #pathway-display {
+    /* Example display area */
+    #display-area {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
+      gap: 10px;
       margin-top: 30px;
     }
-    #pathway-img-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    #display-box {
       width: 300px;
       height: 170px;
       background: rgba(128, 128, 128, 0.5);
       border-radius: 8px;
       overflow: hidden;
-    }
-    #pathway-button-box {
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    #display-link-box {
       width: 300px;
       height: 50px;
       background: rgba(128, 128, 128, 0.5);
       border-radius: 8px;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #pathway-img {
-      display: block;
       width: 100%;
       height: auto;
       visibility: hidden;
     }
     #pathway-button {
-      display: block;
       text-decoration: none;
       font-weight: 900;
-      color: white;
+      color: #fff;
       background: #999966;
       padding: 10px 20px;
       border-radius: 6px;
@@ -166,97 +149,71 @@
     #pathway-button:hover {
       background: #285e8e;
     }
-
-    @media (max-width: 768px) {
-      #drag-container {
-        width: 90%;
-        min-height: 600px;
-      }
-      .row {
-        flex-direction: column;
-        gap: 20px;
-      }
-      .placeholder {
-        width: 50px;
-        height: 50px;
-      }
-      .chip {
-        width: 48px;
-        height: 48px;
-      }
-      #pathway-img-box, #pathway-button-box {
-        width: 90%;
-        height: auto;
-      }
-      #pathway-button {
-        font-size: 14px;
-        padding: 8px 16px;
-      }
-    }
   </style>
 </head>
 <body>
 
 <div id="drag-container">
   <div class="row-wrapper">
-    <!-- ROW of ORIGINS (1,2,3,4) -->
+    <!-- Row of Origins -->
     <div class="row">
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin1"></div>
-        <div class="placeholder-label">Physical<br>Activity</div>
+        <div class="placeholder-label">Physical Activity</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin2"></div>
-        <div class="placeholder-label">Comprehensive<br>Nutrition</div>
+        <div class="placeholder-label">Nutrition</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin3"></div>
-        <div class="placeholder-label">Restful<br>Sleep</div>
+        <div class="placeholder-label">Restful Sleep</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="origin4"></div>
-        <div class="placeholder-label">Stress<br>Management</div>
+        <div class="placeholder-label">Stress</div>
       </div>
     </div>
 
-    <!-- ROW of POSITIONS (a,b,c,d) -->
+    <!-- Row of Positions (a,b,c,d) -->
     <div class="row">
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="a"></div>
-        <div class="placeholder-label">Semester 1<br><span class="weeks">(Weeks 1–13)</span></div>
+        <div class="placeholder-label">Semester 1</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="b"></div>
-        <div class="placeholder-label">Semester 2<br><span class="weeks">(Weeks 14–26)</span></div>
+        <div class="placeholder-label">Semester 2</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="c"></div>
-        <div class="placeholder-label">Semester 3<br><span class="weeks">(Weeks 27–29)</span></div>
+        <div class="placeholder-label">Semester 3</div>
       </div>
       <div class="placeholder-wrapper">
         <div class="placeholder" data-slot="d"></div>
-        <div class="placeholder-label">Semester 4<br><span class="weeks">(Weeks 40–52)</span></div>
+        <div class="placeholder-label">Semester 4</div>
       </div>
     </div>
   </div>
 
-  <div id="pathway-display">
-    <div id="pathway-img-box">
+  <!-- Example final display area -->
+  <div id="display-area">
+    <div id="display-box">
       <img id="pathway-img" src="" alt="Pathway Image">
     </div>
-    <div id="pathway-button-box">
+    <div id="display-link-box">
       <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
     </div>
   </div>
 
-  <!-- A layer for absolutely positioned chips -->
+  <!-- Absolutely positioned chips here -->
   <div id="chips-layer"></div>
 </div>
 
 <script>
-/* -----------------------------
-   (1) Data Setup
------------------------------ */
+// ---------------------------
+// (1) Data + Setup
+// ---------------------------
 const validSlots = {
   "1": ["origin1","a","b","c","d"],
   "2": ["origin2","a","b","c","d"],
@@ -264,6 +221,7 @@ const validSlots = {
   "4": ["origin4","a","b","c","d"]
 };
 
+// Tracks which letter occupies each slot
 const slotMap = {
   origin1: "1",
   origin2: "2",
@@ -275,10 +233,12 @@ const slotMap = {
   d: null
 };
 
+// For convenience if we want a "home" slot
 function originSlot(letter) {
   return "origin" + letter;
 }
 
+// Optional images. You can remove or replace these
 const images = {
   "1": "https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png",
   "2": "https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png",
@@ -286,6 +246,7 @@ const images = {
   "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
 };
 
+// (3) Pathways dictionary for code lookup
 const pathways = {
   "1234": {
     title: "Preventative Health: Foundation Pathway",
@@ -297,7 +258,111 @@ const pathways = {
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-energy-flow-pathway-1243",
     image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/790/1735430889.original.png"
   },
-  // ... etc. your full pathways object ...
+  "1324": {
+    title: "Preventative Health: Balance Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-balance-pathway-1324",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/791/1735431019.original.png"
+  },
+  "1342": {
+    title: "Preventative Health: Renewal Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-renewal-pathway-1342",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/793/1735431430.original.png"
+  },
+  "1423": {
+    title: "Preventative Health: Vital Core Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-vital-core-pathway-1423",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/794/1735431673.original.png"
+  },
+  "1432": {
+    title: "Preventative Health: Tranquility Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-tranquility-pathway-1432",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/795/1735431780.original.png"
+  },
+  "2134": {
+    title: "Preventative Health: Wellness Anchor Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-wellness-anchor-pathway-2134",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/796/1735432010.original.png"
+  },
+  "2143": {
+    title: "Preventative Health: Synergy Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-synergy-pathway-2143",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/797/1735432164.original.png"
+  },
+  "2314": {
+    title: "Preventative Health: Harmony Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-harmony-pathway-2314",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/798/1735432274.original.png"
+  },
+  "2341": {
+    title: "Preventative Health: Resilience Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-resilience-pathway-2341",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/799/1735432407.original.png"
+  },
+  "2413": {
+    title: "Preventative Health: Empower Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-empower-pathway-2413",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/800/1735432527.original.png"
+  },
+  "2431": {
+    title: "Preventative Health: Clarity Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-clarity-pathway-2431",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/801/1735432633.original.png"
+  },
+  "3124": {
+    title: "Preventative Health: Dream Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-dream-pathway-3124",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/802/1735433070.original.png"
+  },
+  "3142": {
+    title: "Preventative Health: Flow Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-flow-pathway-3142",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/803/1735433170.original.png"
+  },
+  "3214": {
+    title: "Preventative Health: Thrive Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-thrive-pathway-3214",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/804/1735433258.original.png"
+  },
+  "3241": {
+    title: "Preventative Health: Serenity Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-serenity-pathway-3241",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png"
+  },
+  "3412": {
+    title: "Preventative Health: Adaptation Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-adaptation-pathway-3412",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/805/1735433374.original.png"
+  },
+  "3421": {
+    title: "Preventative Health: Recovery Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-recovery-pathway-3421",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/807/1735433759.original.png"
+  },
+  "4123": {
+    title: "Preventative Health: Strength Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-strength-pathway-4123",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/808/1735433900.original.png"
+  },
+  "4132": {
+    title: "Preventative Health: Equilibrium Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-equilibrium-pathway-4132",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/809/1735433977.original.png"
+  },
+  "4213": {
+    title: "Preventative Health: Resolve Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-resolve-pathway-4213",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/810/1735434253.original.png"
+  },
+  "4231": {
+    title: "Preventative Health: Compass Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-compass-pathway-4231",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/811/1735434322.original.png"
+  },
+  "4312": {
+    title: "Preventative Health: Endurance Pathway",
+    url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-endurance-pathway-4312",
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/812/1735434427.original.png"
+  },
   "4321": {
     title: "Preventative Health: Zenith Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-zenith-pathway-4321",
@@ -305,54 +370,61 @@ const pathways = {
   }
 };
 
-const chipsLayer = document.getElementById("chips-layer");
-const dragContainerRect = document.getElementById("drag-container").getBoundingClientRect();
 
-/* -----------------------------
-   (2) Create Chips
------------------------------ */
-["1", "2", "3", "4"].forEach(letter => {
+const dragContainer = document.getElementById("drag-container");
+const dragContainerRect = dragContainer.getBoundingClientRect();
+const chipsLayer = document.getElementById("chips-layer");
+
+// ---------------------------
+// (2) Create the initial chips
+// ---------------------------
+["1","2","3","4"].forEach(letter => {
   createChip(letter, `origin${letter}`);
 });
 
 function createChip(letter, slotId) {
-  const chipDiv = document.createElement("div");
-  chipDiv.classList.add("chip");
-  chipDiv.dataset.letter = letter;
+  const chip = document.createElement("div");
+  chip.classList.add("chip");
+  chip.dataset.letter = letter;
 
-  const img = document.createElement("img");
-  img.src = images[letter];
-  chipDiv.appendChild(img);
+  // If you want an image inside
+  if (images[letter]) {
+    const img = document.createElement("img");
+    img.src = images[letter];
+    chip.appendChild(img);
+  } else {
+    // fallback if no image
+    chip.textContent = letter;
+  }
 
-  chipsLayer.appendChild(chipDiv);
+  chipsLayer.appendChild(chip);
+  positionChipOverSlot(chip, slotId);
 
-  // position the chip at its origin circle
-  positionChipOverSlot(chipDiv, slotId);
-
-  // pointer events
-  chipDiv.addEventListener("pointerdown", onPointerDown);
+  // pointer event
+  chip.addEventListener("pointerdown", onPointerDown);
 }
 
-// Center a chip over the given slot
+// Position the chip's .style.left/.style.top so it's centered on a placeholder
 function positionChipOverSlot(chipEl, slotId) {
   const slotEl = document.querySelector(`[data-slot='${slotId}']`);
   if (!slotEl) return;
+
   const slotRect = slotEl.getBoundingClientRect();
+  // offset from container's top-left
+  const offsetLeft = slotRect.left - dragContainerRect.left;
+  const offsetTop  = slotRect.top  - dragContainerRect.top;
 
-  const cx = dragContainerRect.left;
-  const cy = dragContainerRect.top;
+  // center in the circle
+  const centerX = offsetLeft + (slotRect.width/2) - (chipEl.offsetWidth/2);
+  const centerY = offsetTop  + (slotRect.height/2) - (chipEl.offsetHeight/2);
 
-  // If you need a small offset to line it up, adjust:
-  const x = slotRect.left + (slotRect.width / 2) - cx - (chipEl.offsetWidth / 2);
-  const y = slotRect.top  + (slotRect.height / 2) - cy - (chipEl.offsetHeight / 2);
-
-  chipEl.style.left = (x) + "px";
-  chipEl.style.top  = (y) + "px";
+  chipEl.style.left = centerX + "px";
+  chipEl.style.top  = centerY + "px";
 }
 
-/* -----------------------------
-   (3) Pointer-based Drag
------------------------------ */
+// ---------------------------
+// (3) Pointer-based Drag
+// ---------------------------
 let draggedChip = null;
 let oldSlot = null;
 let offsetX = 0;
@@ -362,58 +434,71 @@ let isDragging = false;
 function onPointerDown(e) {
   e.preventDefault();
   draggedChip = e.currentTarget;
-  const letter = draggedChip.dataset.letter;
+  // which slot is it currently in?
+  oldSlot = findSlotOfLetter(draggedChip.dataset.letter);
 
-  oldSlot = findSlotOfLetter(letter);
-  draggedChip.setPointerCapture(e.pointerId);
-
-  // Bring to front while dragging
+  // raise zIndex so it is always on top
   draggedChip.style.zIndex = 9999;
 
+  draggedChip.setPointerCapture(e.pointerId);
   draggedChip.addEventListener("pointermove", onPointerMove);
   draggedChip.addEventListener("pointerup", onPointerUp);
+
   isDragging = true;
 
-  // offset from pointer to chip top-left
-  const chipRect = draggedChip.getBoundingClientRect();
-  offsetX = e.clientX - chipRect.left;
-  offsetY = e.clientY - chipRect.top;
+  // measure offset from pointer to chip's top-left corner
+  const rect = draggedChip.getBoundingClientRect();
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 }
 
 function onPointerMove(e) {
   if (!isDragging || !draggedChip) return;
   e.preventDefault();
 
-  const x = e.clientX - dragContainerRect.left - offsetX;
-  const y = e.clientY - dragContainerRect.top  - offsetY;
+  // pointer coords relative to container
+  const relX = e.clientX - dragContainerRect.left;
+  const relY = e.clientY - dragContainerRect.top;
 
+  // minus offset so chip doesn't jump
+  let x = relX - offsetX;
+  let y = relY - offsetY;
+
+  // clamp inside container if you want
   const maxX = dragContainerRect.width - draggedChip.offsetWidth;
   const maxY = dragContainerRect.height - draggedChip.offsetHeight;
+  x = Math.max(0, Math.min(x, maxX));
+  y = Math.max(0, Math.min(y, maxY));
 
-  draggedChip.style.left = Math.max(0, Math.min(x, maxX)) + "px";
-  draggedChip.style.top  = Math.max(0, Math.min(y, maxY)) + "px";
+  draggedChip.style.left = x + "px";
+  draggedChip.style.top  = y + "px";
 }
 
 function onPointerUp(e) {
   e.preventDefault();
   if (!draggedChip) return;
 
+  // restore normal zIndex
+  draggedChip.style.zIndex = 10;
+
   draggedChip.releasePointerCapture(e.pointerId);
   draggedChip.removeEventListener("pointermove", onPointerMove);
   draggedChip.removeEventListener("pointerup", onPointerUp);
+
   isDragging = false;
 
-  // Return chip zIndex to normal
-  draggedChip.style.zIndex = 10;
-
+  // find final drop target
   let target = document.elementFromPoint(e.clientX, e.clientY);
   if (target && target.classList.contains("chip")) {
     target = target.parentElement;
   }
 
   const letter = draggedChip.dataset.letter;
+  // if we dropped on a .placeholder (like a,b,c,d)
   if (target && target.classList.contains("placeholder")) {
     const targetSlot = target.dataset.slot;
+
+    // check if valid
     if (
       ["a","b","c","d"].includes(targetSlot) &&
       validSlots[letter].includes(targetSlot) &&
@@ -422,6 +507,7 @@ function onPointerUp(e) {
       // occupant logic
       const occupant = slotMap[targetSlot];
       if (occupant) {
+        // occupant -> occupant's origin
         const occupantChip = findChipByLetter(occupant);
         if (occupantChip) {
           forceMoveChipToSlot(occupantChip, targetSlot, originSlot(occupant));
@@ -429,46 +515,46 @@ function onPointerUp(e) {
         slotMap[targetSlot] = null;
       }
       forceMoveChipToSlot(draggedChip, oldSlot, targetSlot);
-      updatePathwayDisplay();
+      updateDisplay();
       draggedChip = null;
       oldSlot = null;
       return;
     }
   }
-
-  // revert if invalid
+  // else revert
   revertChip(draggedChip, oldSlot);
   draggedChip = null;
   oldSlot = null;
-  updatePathwayDisplay();
+  updateDisplay();
 }
 
-/* Revert chip to its origin */
 function revertChip(chipEl, fromSlot) {
   const letter = chipEl.dataset.letter;
   const home = originSlot(letter);
   forceMoveChipToSlot(chipEl, fromSlot, home);
 }
 
-/* Move a chip to a slot */
 function forceMoveChipToSlot(chipEl, fromSlot, toSlot) {
+  // occupant logic again, just in case
   const occupant = slotMap[toSlot];
   if (occupant && occupant !== chipEl.dataset.letter) {
-    // occupant -> occupant's home
     const occupantChip = findChipByLetter(occupant);
     if (occupantChip) {
       forceMoveChipToSlot(occupantChip, toSlot, originSlot(occupant));
     }
     slotMap[toSlot] = null;
   }
+  // map assignment
   slotMap[toSlot] = chipEl.dataset.letter;
+  // remove from oldSlot if it had the same letter
   if (slotMap[fromSlot] === chipEl.dataset.letter) {
     slotMap[fromSlot] = null;
   }
+  // physically move the chip
   positionChipOverSlot(chipEl, toSlot);
 }
 
-/* Which slot has this letter? */
+// Find the slot that currently holds a certain letter
 function findSlotOfLetter(letter) {
   for (const slot in slotMap) {
     if (slotMap[slot] === letter) {
@@ -478,16 +564,15 @@ function findSlotOfLetter(letter) {
   return null;
 }
 
-/* Find the .chip element for a letter */
 function findChipByLetter(letter) {
   return Array.from(document.querySelectorAll(".chip"))
     .find(chip => chip.dataset.letter === letter);
 }
 
-/* -----------------------------
-   (4) Update Pathway
------------------------------ */
-function updatePathwayDisplay() {
+// ---------------------------
+// (4) Show final or partial result
+// ---------------------------
+function updateDisplay() {
   const code = [slotMap.a, slotMap.b, slotMap.c, slotMap.d].join("");
   const allFilled = slotMap.a && slotMap.b && slotMap.c && slotMap.d;
 
@@ -505,10 +590,12 @@ function updatePathwayDisplay() {
 
   imgEl.src = p.image;
   imgEl.style.visibility = "visible";
+
   btnEl.textContent = p.title;
   btnEl.href = p.url;
   btnEl.style.visibility = "visible";
 }
+
 </script>
 </body>
 </html>
