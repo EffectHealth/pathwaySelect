@@ -487,18 +487,12 @@ function onPointerUp(e) {
 
   isDragging = false;
 
-  // find final drop target
-  let target = document.elementFromPoint(e.clientX, e.clientY);
-  if (target && target.classList.contains("chip")) {
-    target = target.parentElement;
-  }
-
   const letter = draggedChip.dataset.letter;
-  // if we dropped on a .placeholder (like a,b,c,d)
-  if (target && target.classList.contains("placeholder")) {
-    const targetSlot = target.dataset.slot;
+  const targetPlaceholder = findPlaceholderUnderChip(draggedChip);
 
-    // check if valid
+  if (targetPlaceholder) {
+    const targetSlot = targetPlaceholder.dataset.slot;
+    // Check if it’s a valid slot
     if (
       ["a","b","c","d"].includes(targetSlot) &&
       validSlots[letter].includes(targetSlot) &&
@@ -521,11 +515,38 @@ function onPointerUp(e) {
       return;
     }
   }
-  // else revert
+
+  // Otherwise revert
   revertChip(draggedChip, oldSlot);
   draggedChip = null;
   oldSlot = null;
   updateDisplay();
+}
+
+  function findPlaceholderUnderChip(chipEl) {
+  // Get the bounding rectangle of the chip
+  const chipRect = chipEl.getBoundingClientRect();
+
+  // Example: let’s use the chip’s center point
+  const chipCenterX = chipRect.left + chipRect.width / 2;
+  const chipCenterY = chipRect.top + chipRect.height / 2;
+
+  // Check all placeholders
+  const placeholders = document.querySelectorAll(".placeholder");
+  for (const ph of placeholders) {
+    const phRect = ph.getBoundingClientRect();
+
+    // If the center is within the placeholder's rectangle
+    if (
+      chipCenterX >= phRect.left &&
+      chipCenterX <= phRect.right &&
+      chipCenterY >= phRect.top &&
+      chipCenterY <= phRect.bottom
+    ) {
+      return ph; // Return the placeholder DOM element
+    }
+  }
+  return null;
 }
 
 function revertChip(chipEl, fromSlot) {
