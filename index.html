@@ -222,6 +222,15 @@ body {
   background: #285e8e;
 }
 
+#display-caption {
+  width: 75vw;
+  max-width: 600px;
+  margin: 10px auto;    /* Spacing above and below caption */
+  text-align: center;
+  font-size: 1.2vw;     /* Adjust based on design */
+  color: #333;
+}
+
     /* 
       NOTE: 
       If you want the final display area to match the 
@@ -307,13 +316,15 @@ body {
 
   <!-- Example final display area -->
   <div id="display-area">
-    <div id="display-box">
-      <img id="pathway-img" src="" alt="Pathway Image">
-    </div>
-    <div id="display-link-box">
-      <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
-    </div>
+  <div id="display-box">
+    <img id="pathway-img" src="" alt="Pathway Image">
   </div>
+  <div id="display-link-box">
+    <a id="pathway-button" href="#" target="_blank">Pathway Title</a>
+  </div>
+  <!-- New caption element -->
+  <p id="display-caption"></p>
+</div>
 
   <!-- Absolutely positioned chips here -->
   <div id="chips-layer"></div>
@@ -358,7 +369,8 @@ const pathways = {
   "1234": {
     title: "Preventative Health: Foundation Pathway",
     url: "https://preventativehealthcourse.effecttherapy.ca/bundles/preventative-health-foundation-pathway-1234",
-    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/784/1735430581.original.png"
+    image: "https://files.cdn.thinkific.com/bundles/bundle_card_image_000/210/784/1735430581.original.png",
+    caption: "Achieve balance and stability with Equilibrium. Lead with stress management, energize through movement, rest deeply with sleep, and refine your diet. This pathway fosters harmony across all dimensions of well-being."
   },
   "1243": {
     title: "Preventative Health: Energy Flow Pathway",
