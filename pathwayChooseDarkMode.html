@@ -741,6 +741,21 @@ function updateDisplay() {
   }
 }
 
+// Force repositioning after full page load within the iframe
+  window.addEventListener('load', () => {
+    // Recalculate container dimensions
+    dragContainerRect = dragContainer.getBoundingClientRect();
+    
+    // Reposition each chip to its origin
+    document.querySelectorAll('.chip').forEach(chip => {
+      const letter = chip.dataset.letter;
+      const originId = originSlot(letter);
+      positionChipOverSlot(chip, originId);
+    });
+
+    // Optionally update the display in case positions affect initial state
+    updateDisplay();
+  });
 </script>
 </body>
 </html>
