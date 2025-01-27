@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Final Drag & Drop: Ghost Chips + Transparent + Matching Width - Light Mode</title>
   <style>
     * {
@@ -24,16 +25,14 @@
        background: transparent;
     }
 
-    #drag-container {
-      position: relative;
-      width: 100%;
-      max-width: 300px;
-      min-height: 40vh;
-      background: transparent;
-      border: none;
-      margin-bottom: 40px;
-      overflow: hidden;
-    }
+   #drag-container {
+  position: relative;
+  width: 100%; /* Full width of the parent */
+  max-width: 800px; /* Limit size for large screens */
+  height: auto; /* Adjust dynamically */
+  aspect-ratio: 16/9; /* Maintain proportions */
+  margin: 0 auto; /* Center horizontally */
+}
 
     .row-wrapper {
       display: flex;
@@ -67,13 +66,19 @@
       justify-content: center;
       overflow: hidden;
     }
-    .placeholder-label {
-      color: #000;  /* dark text for labels */
-      text-align: center;
-      font-weight: 500;
-      margin-top: 10px;
-      font-size: 3vw;
-    }
+.placeholder {
+  position: relative;
+  width: 12%; /* Scale relative to the container */
+  max-width: 80px; /* Cap size for larger screens */
+  height: auto; /* Adjust height dynamically */
+  aspect-ratio: 1 / 1; /* Keep the element perfectly square */
+  border: 2px dotted #000; /* Keeps your dotted border */
+  border-radius: 50%; /* Keeps the circular design */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
     .ghost {
       position: absolute;
@@ -96,22 +101,22 @@
       pointer-events: none;
     }
 
-    .chip {
-      position: absolute;
-      width: 15vw;
-      height: 15vw;
-      max-width: 40px;
-      max-height: 40px;
-      border-radius: 50%;
-      background: #ccc;
-      cursor: grab;
-      pointer-events: auto; 
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: none;
-    }
+.chip {
+  position: absolute;
+  width: 12%; /* Scale relative to the container */
+  max-width: 80px; /* Cap size for larger screens */
+  height: auto; /* Adjust height dynamically */
+  aspect-ratio: 1 / 1; /* Keep the element perfectly square */
+  border-radius: 50%; /* Keeps the circular design */
+  background: #ccc; /* Your background color */
+  cursor: grab; /* Maintain the grab cursor */
+  pointer-events: auto;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
     .chip:active {
       cursor: grabbing;
     }
