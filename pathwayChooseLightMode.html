@@ -2,12 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Ensure mobile-friendly scaling if this page is loaded standalone -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Final Drag & Drop: Ghost Chips + Transparent + Matching Width - Light Mode</title>
-
   <style>
-    /* Reset + basic setup */
     * {
       margin: 0;
       padding: 0;
@@ -18,63 +14,53 @@
       font-family: sans-serif;
     }
 
+    /* 2) Basic body styling */
     body {
-      margin: 0;
-      padding: 0;
-      background: transparent; /* or #fff if you prefer */
-      /* We don't force min-height here; the container below will handle it. */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 0;
+      min-height: 100vh;
+       background: transparent;
     }
 
-    /*
-      A wrapper that ensures content never exceeds
-      a given width, so it doesn't blow up on big screens.
-    */
-    .drag-drop-wrapper {
-      width: 100%;
-      max-width: 700px; /* Adjust as needed for your design */
-      margin: 0 auto;
-      padding: 20px;
-      background: transparent;
-    }
-
-    /* The main drag container, sized to fill .drag-drop-wrapper */
     #drag-container {
       position: relative;
       width: 100%;
-      min-height: 500px; /* Adjust for how tall you want your layout */
+      max-width: 800px;
+      min-height: 60vh;
       background: transparent;
       border: none;
       margin-bottom: 40px;
       overflow: hidden;
     }
 
-    /* Rows for your placeholders */
     .row-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px; /* vertical gap between the two rows */
-      margin-top: 20px;
+      gap: 3vh;
+      margin-top: 3vh;
     }
     .row {
       display: flex;
       justify-content: center;
-      gap: 40px; /* horizontal gap among placeholders */
+      gap: 5vw;
     }
-
-    /* Placeholder circle + label */
     .placeholder-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 80px; /* or 90px, 100px, etc. */
-      margin: 0 auto;
+      width: 15vw;
+      max-width: 80px;
     }
     .placeholder {
       position: relative;
-      width: 80px;
-      height: 80px;
-      border: 2px dotted #000; /* dark dotted border for visibility on light bg */
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border: 2px dotted #000; /* dark dotted border for visibility on white */
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -82,14 +68,13 @@
       overflow: hidden;
     }
     .placeholder-label {
-      color: #000; /* dark text on light background */
+      color: #000;  /* dark text for labels */
       text-align: center;
       font-weight: 500;
-      margin-top: 8px;
-      font-size: 14px; /* more typical size than vw */
+      margin-top: 10px;
+      font-size: 3vw;
     }
 
-    /* The ghost images that sit inside the placeholder circles */
     .ghost {
       position: absolute;
       top: 0; 
@@ -102,21 +87,21 @@
       object-fit: cover;
     }
 
-    /* Layer for absolutely positioned draggable chips */
     #chips-layer {
       position: absolute;
-      top: 0;
       left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none; /* chips themselves re-enable pointer-events */
+      pointer-events: none;
     }
 
-    /* Draggable chips themselves */
     .chip {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
       border-radius: 50%;
       background: #ccc;
       cursor: grab;
@@ -138,26 +123,20 @@
       object-fit: cover;
     }
 
-    /* Final display area */
     #display-area {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
+      gap: 3vh;
       margin-top: 30px;
     }
 
-    /*
-      A container for your main "preview" image.
-      Using aspect-ratio to maintain shape if you prefer,
-      or you can remove aspect-ratio and use a fixed height.
-    */
     #display-box {
       position: relative;
-      width: 100%;
-      max-width: 600px; /* keep it smaller than the container's max-width */
-      aspect-ratio: 38 / 21; /* or remove if you want a fixed height */
+      width: 75vw;
+      max-width: 600px;
+      aspect-ratio: 38 / 21;
       margin: 0 auto;
       background: rgba(128, 128, 128, 0.5);
       border-radius: 8px;
@@ -168,46 +147,21 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      visibility: hidden; /* hide until we have a valid code */
+      visibility: hidden;
       display: block;
     }
 
-    #display-box-placeholder {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #666;
-      font-size: 16px;
-      text-align: center;
-      pointer-events: none;
-    }
-
-    /* Link box container */
     #display-link-box {
-      width: 100%;
+      width: 75vw;
       max-width: 600px;
       position: relative;
       margin: 0 auto;
       background: rgba(128, 128, 128, 0.5);
       border-radius: 8px;
       overflow: hidden;
-      /* You had padding-top: 13.82%; 
-         You can reduce it if you prefer a smaller box. */
-      padding-top: 10%;
-    }
-    #display-link-placeholder {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #666;
-      font-size: 14px;
-      text-align: center;
-      pointer-events: none;
+      padding-top: 13.82%;
     }
 
-    /* The button displayed after user completes the four slots */
     #pathway-button {
       position: absolute;
       top: 0; 
@@ -219,12 +173,12 @@
       color: #fff;
       background: #999966;
       border-radius: 6px;
-      visibility: hidden; /* hidden until valid arrangement */
+      visibility: hidden;
       transition: background 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 3vw;
       text-align: center;
       line-height: 1.2;
       padding: 0 10px;
@@ -234,16 +188,37 @@
     }
 
     #display-caption {
-      width: 100%;
+      width: 75vw;
       max-width: 600px;
       margin: 10px auto;
       text-align: center;
-      font-size: 14px;
-      color: #000;
+      font-size: 3vw;
+      color: #000; /* dark text for caption in light mode */
+    }
+
+    #display-box-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #666;  /* dark gray for placeholder text on white */
+      font-size: 4vw;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #display-link-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #666;  /* dark gray for placeholder text on white */
+      font-size: 3vw;
+      text-align: center;
+      pointer-events: none;
     }
   </style>
 </head>
-
 <body>
 
 <div id="drag-container">
@@ -515,7 +490,7 @@ const chipsLayer = document.getElementById("chips-layer");
 // (2) Create the initial chips
 // ---------------------------
 ["1","2","3","4"].forEach(letter => {
-  createChip(letter, `origin${letter}`);
+  createChip(letter, origin${letter});
 });
 
 function createChip(letter, slotId) {
@@ -541,7 +516,7 @@ function createChip(letter, slotId) {
 
 // Position the chip over the placeholder center
 function positionChipOverSlot(chipEl, slotId) {
-  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
+  const slotEl = document.querySelector([data-slot='${slotId}']);
   if (!slotEl) return;
 
   const slotRect = slotEl.getBoundingClientRect();
