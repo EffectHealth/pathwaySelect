@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Final Drag & Drop: Ghost Chips + Transparent + Matching Width - Light Mode</title>
   <style>
     * {
@@ -25,14 +24,16 @@
        background: transparent;
     }
 
-   #drag-container {
-  position: relative;
-  width: 100%; /* Full width of the parent */
-  max-width: 800px; /* Limit size for large screens */
-  height: auto; /* Adjust dynamically */
-  aspect-ratio: 16/9; /* Maintain proportions */
-  margin: 0 auto; /* Center horizontally */
-}
+    #drag-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      min-height: 60vh;
+      background: transparent;
+      border: none;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
 
     .row-wrapper {
       display: flex;
@@ -53,20 +54,26 @@
       width: 15vw;
       max-width: 80px;
     }
-
-.placeholder {
-  position: relative;
-  width: 12%; /* Scale relative to the container */
-  max-width: 80px; /* Cap size for larger screens */
-  height: auto; /* Adjust height dynamically */
-  aspect-ratio: 1 / 1; /* Keep the element perfectly square */
-  border: 2px dotted #000; /* Keeps your dotted border */
-  border-radius: 50%; /* Keeps the circular design */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
+    .placeholder {
+      position: relative;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border: 2px dotted #000; /* dark dotted border for visibility on white */
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .placeholder-label {
+      color: #000;  /* dark text for labels */
+      text-align: center;
+      font-weight: 500;
+      margin-top: 10px;
+      font-size: 3vw;
+    }
 
     .ghost {
       position: absolute;
@@ -89,22 +96,22 @@
       pointer-events: none;
     }
 
-.chip {
-  position: absolute;
-  width: 12%; /* Scale relative to the container */
-  max-width: 80px; /* Cap size for larger screens */
-  height: auto; /* Adjust height dynamically */
-  aspect-ratio: 1 / 1; /* Keep the element perfectly square */
-  border-radius: 50%; /* Keeps the circular design */
-  background: #ccc; /* Your background color */
-  cursor: grab; /* Maintain the grab cursor */
-  pointer-events: auto;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: none;
-}
+    .chip {
+      position: absolute;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: grab;
+      pointer-events: auto; 
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
     .chip:active {
       cursor: grabbing;
     }
@@ -128,7 +135,7 @@
     #display-box {
       position: relative;
       width: 75vw;
-      max-width: 225px;
+      max-width: 600px;
       aspect-ratio: 38 / 21;
       margin: 0 auto;
       background: rgba(128, 128, 128, 0.5);
@@ -146,7 +153,7 @@
 
     #display-link-box {
       width: 75vw;
-      max-width: 225px;
+      max-width: 600px;
       position: relative;
       margin: 0 auto;
       background: rgba(128, 128, 128, 0.5);
@@ -182,7 +189,7 @@
 
     #display-caption {
       width: 75vw;
-      max-width: 225px;
+      max-width: 600px;
       margin: 10px auto;
       text-align: center;
       font-size: 3vw;
