@@ -490,7 +490,7 @@ const chipsLayer = document.getElementById("chips-layer");
 // (2) Create the initial chips
 // ---------------------------
 ["1","2","3","4"].forEach(letter => {
-  createChip(letter, origin${letter});
+  createChip(letter, `origin${letter}`);
 });
 
 function createChip(letter, slotId) {
@@ -516,7 +516,7 @@ function createChip(letter, slotId) {
 
 // Position the chip over the placeholder center
 function positionChipOverSlot(chipEl, slotId) {
-  const slotEl = document.querySelector([data-slot='${slotId}']);
+  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
   if (!slotEl) return;
 
   const slotRect = slotEl.getBoundingClientRect();
