@@ -749,6 +749,12 @@ function updateDisplay() {
   if (p.caption) {
     captionEl.textContent = p.caption;
   }
+
+    // Trigger a custom event for pathway selection
+  fbq('trackCustom', 'PathwaySelected', {
+    pathwayCode: code,
+    pathwayTitle: p.title
+  });
 }
 
 // Force repositioning after full page load within the iframe
