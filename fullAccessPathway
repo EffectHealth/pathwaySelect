@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Open Access Pathway - Preventative Health</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      font-family: sans-serif;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 0;
+      min-height: 100vh;
+      background: transparent;
+    }
+    #drag-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      min-height: 60vh;
+      background: transparent;
+      border: none;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+    .row-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3vh;
+      margin-top: 3vh;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 5vw;
+    }
+    .placeholder-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 15vw;
+      max-width: 80px;
+    }
+    .placeholder {
+      position: relative;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border: 2px dotted #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f4f4f4;
+    }
+    .placeholder-label {
+      color: #000;
+      text-align: center;
+      font-weight: 500;
+      margin-top: 10px;
+      font-size: 3vw;
+    }
+    .ghost {
+      position: absolute;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.25;
+      pointer-events: none;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    #chips-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .chip {
+      position: absolute;
+      width: 15vw;
+      height: 15vw;
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: not-allowed; /* not draggable */
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      filter: grayscale(1) brightness(1.2) opacity(0.7); /* greyed out visually */
+      pointer-events: none; /* disables all interactivity */
+    }
+    .chip img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      pointer-events: none;
+      filter: grayscale(1) brightness(1.2) opacity(0.7); /* also greys out images */
+    }
+    #display-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3vh;
+      margin-top: 30px;
+    }
+    #display-box {
+      position: relative;
+      width: 75vw;
+      max-width: 600px;
+      aspect-ratio: 38 / 21;
+      margin: 0 auto;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #pathway-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      visibility: visible;
+    }
+    #display-link-box {
+      width: 75vw;
+      max-width: 600px;
+      position: relative;
+      margin: 0 auto;
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+      padding-top: 13.82%;
+    }
+    #pathway-button {
+      position: absolute;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      font-weight: 900;
+      color: #fff;
+      background: #999966;
+      border-radius: 6px;
+      visibility: visible;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4vw;
+      text-align: center;
+      line-height: 1.2;
+      padding: 0 10px;
+    }
+    #pathway-button:hover {
+      background: #cccc89;
+    }
+    #display-caption {
+      width: 75vw;
+      max-width: 600px;
+      margin: 10px auto;
+      text-align: center;
+      font-size: 3vw;
+      color: #000;
+    }
+    #display-box-placeholder,
+    #display-link-placeholder {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+<div id="drag-container">
+  <div class="row-wrapper">
+
+    <!-- Row of Origins -->
+    <div class="row">
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin1">
+          <img class="ghost" 
+               src="https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png"
+               alt="Ghost 1">
+        </div>
+        <div class="placeholder-label">Physical Activity</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin2">
+          <img class="ghost"
+               src="https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png"
+               alt="Ghost 2">
+        </div>
+        <div class="placeholder-label">Nutrition</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin3">
+          <img class="ghost"
+               src="https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png"
+               alt="Ghost 3">
+        </div>
+        <div class="placeholder-label">Restful Sleep</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="origin4">
+          <img class="ghost"
+               src="https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
+               alt="Ghost 4">
+        </div>
+        <div class="placeholder-label">Stress</div>
+      </div>
+    </div>
+
+    <!-- Row of Positions (a,b,c,d) -->
+    <div class="row">
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="a"></div>
+        <div class="placeholder-label">Semester 1</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="b"></div>
+        <div class="placeholder-label">Semester 2</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="c"></div>
+        <div class="placeholder-label">Semester 3</div>
+      </div>
+      <div class="placeholder-wrapper">
+        <div class="placeholder" data-slot="d"></div>
+        <div class="placeholder-label">Semester 4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Example final display area -->
+  <div id="display-area">
+    <div id="display-box">
+      <img id="pathway-img"
+           src="https://cdn.fs.teachablecdn.com/47cven3jRpSoB4Ebpkdc"
+           alt="Open Access Pathway">
+    </div>
+    <div id="display-link-box">
+      <a id="pathway-button"
+         href="https://preventativehealthcourse.effecttherapy.ca/p/preventative-health-open-access-pathway"
+         target="_blank">Click Here to Continue</a>
+    </div>
+    <p id="display-caption">
+      The Open Access Pathway gives you complete access to all four Preventative Health™ courses—without semester pacing or a required order.
+    </p>
+  </div>
+
+  <!-- Absolutely positioned chips here (not draggable, just greyed out and static) -->
+  <div id="chips-layer"></div>
+</div>
+
+<script>
+// Images for actual chips
+const images = {
+  "1": "https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png",
+  "2": "https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png",
+  "3": "https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png",
+  "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
+};
+
+const dragContainer = document.getElementById("drag-container");
+let dragContainerRect = dragContainer.getBoundingClientRect();
+const chipsLayer = document.getElementById("chips-layer");
+
+// Position each chip in its original (origin1-origin4) slot, statically
+["1","2","3","4"].forEach(letter => {
+  createChip(letter, `origin${letter}`);
+});
+
+function createChip(letter, slotId) {
+  const chip = document.createElement("div");
+  chip.classList.add("chip");
+  chip.dataset.letter = letter;
+
+  // Insert the image
+  if (images[letter]) {
+    const img = document.createElement("img");
+    img.src = images[letter];
+    chip.appendChild(img);
+  } else {
+    chip.textContent = letter;
+  }
+
+  chipsLayer.appendChild(chip);
+  positionChipOverSlot(chip, slotId);
+}
+
+// Position the chip over the placeholder center
+function positionChipOverSlot(chipEl, slotId) {
+  const slotEl = document.querySelector(`[data-slot='${slotId}']`);
+  if (!slotEl) return;
+
+  const slotRect = slotEl.getBoundingClientRect();
+  const offsetLeft = slotRect.left - dragContainerRect.left;
+  const offsetTop  = slotRect.top  - dragContainerRect.top;
+
+  const centerX = offsetLeft + (slotRect.width/2) - (chipEl.offsetWidth/2);
+  const centerY = offsetTop  + (slotRect.height/2) - (chipEl.offsetHeight/2);
+
+  chipEl.style.left = centerX + "px";
+  chipEl.style.top  = centerY + "px";
+}
+
+// On load, recalc positions to account for layout/iframe
+window.addEventListener('load', () => {
+  dragContainerRect = dragContainer.getBoundingClientRect();
+  document.querySelectorAll('.chip').forEach(chip => {
+    const letter = chip.dataset.letter;
+    const originId = `origin${letter}`;
+    positionChipOverSlot(chip, originId);
+  });
+});
+</script>
+</body>
+</html>
