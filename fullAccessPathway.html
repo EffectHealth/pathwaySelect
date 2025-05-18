@@ -98,14 +98,14 @@
       max-height: 80px;
       border-radius: 50%;
       background: #ccc;
-      cursor: not-allowed; /* not draggable */
+      cursor: not-allowed;
       z-index: 10;
       display: flex;
       align-items: center;
       justify-content: center;
       touch-action: none;
-      filter: grayscale(1) brightness(1.2) opacity(0.7); /* greyed out visually */
-      pointer-events: none; /* disables all interactivity */
+      /* Removed filter for a consistent image */
+      pointer-events: none;
     }
     .chip img {
       width: 100%;
@@ -113,7 +113,7 @@
       border-radius: 50%;
       object-fit: cover;
       pointer-events: none;
-      filter: grayscale(1) brightness(1.2) opacity(0.7); /* also greys out images */
+      /* No filter */
     }
     #display-area {
       display: flex;
@@ -267,18 +267,13 @@
     </p>
   </div>
 
-  <!-- Absolutely positioned chips here (not draggable, just greyed out and static) -->
+  <!-- Absolutely positioned chips here (not draggable, just static) -->
   <div id="chips-layer"></div>
 </div>
 
 <script>
-// Images for actual chips
-const images = {
-  "1": "https://static.wixstatic.com/media/048b4b_bf890793ede846d1a9b50ac133ec7002~mv2.png",
-  "2": "https://static.wixstatic.com/media/048b4b_54cca8d4592245788aa47d203da6c5a2~mv2.png",
-  "3": "https://static.wixstatic.com/media/048b4b_cc7c6a363a9a4cdd93e298a2014b79ed~mv2.png",
-  "4": "https://static.wixstatic.com/media/048b4b_a4c341c0ce1b4084bfb6adccb91045af~mv2.png"
-};
+// All chips use the same, uniform image
+const chipImageUrl = "https://static.wixstatic.com/media/048b4b_73ded33a85d54ee4ba311a857895d46e~mv2.png";
 
 const dragContainer = document.getElementById("drag-container");
 let dragContainerRect = dragContainer.getBoundingClientRect();
@@ -294,14 +289,10 @@ function createChip(letter, slotId) {
   chip.classList.add("chip");
   chip.dataset.letter = letter;
 
-  // Insert the image
-  if (images[letter]) {
-    const img = document.createElement("img");
-    img.src = images[letter];
-    chip.appendChild(img);
-  } else {
-    chip.textContent = letter;
-  }
+  // Use the single uniform image for all chips
+  const img = document.createElement("img");
+  img.src = chipImageUrl;
+  chip.appendChild(img);
 
   chipsLayer.appendChild(chip);
   positionChipOverSlot(chip, slotId);
